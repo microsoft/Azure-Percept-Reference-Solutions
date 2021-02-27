@@ -4,12 +4,12 @@ trigger:
   branches:
     include:
       - releases/*
-      - master
+      - main
   paths:
     include:
-    - e2e-solutions/people-detection-app
-    - e2e-solutions/people-detection-app/pipelines/build-Percept.yml
-    - e2e-solutions/people-detection-app/pipelines/deploy-Percept.yml
+    - people-detection-app
+    - people-detection-app/pipelines/build-Percept.yml
+    - people-detection-app/pipelines/deploy-Percept.yml
 
 pool:
   default
@@ -45,7 +45,7 @@ stages:
           fi
           
           # Change directory location to template scripts folder
-          cd e2e-solutions/people-detection-app/
+          cd people-detection-app/
           
           # Run shellcheck, Shellcheck will return a list of warnings if the script is not compliant with all the rules
           # We are checking the result returned by shellcheck.
@@ -72,18 +72,18 @@ stages:
     - task: CopyFiles@2
       displayName: 'Copy deployment manifest files to a combined folder'
       inputs:
-        SourceFolder: '$(System.DefaultWorkingDirectory)/e2e-solutions/people-detection-app/'
+        SourceFolder: '$(System.DefaultWorkingDirectory)/people-detection-app/'
         Contents: |
           .env
           lva-topology-params.json
           lva-topology.json
           lva.template.json
-        TargetFolder: '$(System.DefaultWorkingDirectory)/e2e-solutions/people-detection-app/combined'
+        TargetFolder: '$(System.DefaultWorkingDirectory)/people-detection-app/combined'
     
     # Creating the manifest bundle zip from combined folder
     - task: ArchiveFiles@2
       inputs:
-        rootFolderOrFile: '$(System.DefaultWorkingDirectory)/e2e-solutions/people-detection-app/combined'
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)/people-detection-app/combined'
         includeRootFolder: false
         archiveType: 'zip'
         archiveFile: '$(System.DefaultWorkingDirectory)/manifest-bundle-azurepercept.zip'
@@ -96,8 +96,8 @@ stages:
         Contents: |
           manifest-bundle-azurepercept.zip
           ues_app/people-detection-app.zip
-          e2e-solutions/people-detection-app/arm-internal-deploy-modules-percept.sh
-          e2e-solutions/people-detection-app/ARM-template.json
+          people-detection-app/arm-internal-deploy-modules-percept.sh
+          people-detection-app/ARM-template.json
         TargetFolder: '$(System.DefaultWorkingDirectory)/arm_template_bundle_percept'
         flattenFolders: true
 
