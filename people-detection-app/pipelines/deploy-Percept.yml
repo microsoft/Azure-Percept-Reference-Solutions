@@ -1,0 +1,450 @@
+# CI disabled
+trigger: none
+
+# Trigger after completion of Build ARM Template Pipeline
+resources:
+  pipelines:
+  - pipeline: build
+    project: UnifiedEdgeScenarios
+    source: Build Azure Percept
+    trigger:
+      enabled: true
+
+pool: 
+  default
+
+variables:
+  buildSuffix: '$(Build.BuildNumber)' 
+  ${{ if or(startsWith(variables['Build.SourceBranchName'], 'release'), eq(variables['Build.SourceBranchName'], 'master')) }}:
+    Variable_Group: 'AzurePercept_ReleaseEnvironment'
+  ${{ if and(not(startsWith(variables['Build.SourceBranchName'], 'release')), ne(variables['Build.SourceBranchName'], 'master')) }}:
+     Variable_Group: 'AzurePercept_TestEnvironment'
+
+
+stages:
+- stage: 'Deploy'
+  jobs:
+  - job: 'Deploy'
+    variables:
+     - group: ${{variables.Variable_Group}}
+    displayName: 'Deploy ARM Template to a test environment'
+    steps:
+    - checkout: self
+
+    - task: DownloadPipelineArtifact@2
+      enabled: true
+      displayName: 'Download artifacts from Build Azure Percept Pipeline'
+      inputs:
+        buildType: 'specific'
+        project: '1ab7de3c-f8b7-4b59-be5a-fa78b4f4570c'
+        definition: '8'
+        buildVersionToDownload: 'latest'
+        targetPath: '$(System.DefaultWorkingDirectory)'
+  
+    - task: Bash@3
+      enabled: true
+      displayName: 'Update ARM template and scripts with temporary blob container links'
+      inputs:
+        targetType: 'inline'
+        script: |
+          # Exit the script on any error
+          
+          echo "Extracting files from artifact zip"
+           
+          unzip -o arm-deployment-bundle-percept.zip -d .
+          
+          echo "Updating links in ARM template and scripts to point to temporary container in blob storage"
+          
+          STORAGE_ACCOUNT_ARM_SCRIPTS_CONTAINER_NAME="$RELEASE_STORAGE_ACCOUNT_TEMP_ARM_CONTAINER_NAME"
+
+          MANIFEST_URL="https://${RELEASE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${STORAGE_ACCOUNT_ARM_SCRIPTS_CONTAINER_NAME}/azurepercept-bundle.zip"
+          sed -i 's#^\(SAS_URL[ ]*=\).*#\1\"'"$MANIFEST_URL"'\"#g' "arm-internal-deploy-modules-percept.sh"
+          
+          IS_JQ_INSTALLED=$(apt list --installed | grep -c -w jq)
+          if [ "$IS_JQ_INSTALLED" -eq 0 ]; then
+              echo "Installing jq"
+              sudo apt-get install jq
+              echo "Installed jq"
+          fi
+          
+          echo "Updating Primary scripts Url for deploymentScript in arm template"
+          
+          SCRIPT_URL="https://${RELEASE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${STORAGE_ACCOUNT_ARM_SCRIPTS_CONTAINER_NAME}/arm-internal-deploy-modules-percept.sh"
+          jq --arg a "$SCRIPT_URL" '.resources[8].properties.template.resources[0].properties.primaryScriptUri = $a' ARM-template.json > "tmp" && mv "tmp" ARM-template.json
+          
+          SCRIPT_URL="https://${RELEASE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${STORAGE_ACCOUNT_ARM_SCRIPTS_CONTAINER_NAME}/people-detection-app.zip"
+          jq --arg a "$SCRIPT_URL" '.resources[9].properties.template.resources[1].resources[3].properties.packageUri = $a' ARM-template.json > "tmp" && mv "tmp" ARM-template.json
+          
+          echo "Updated Primary scripts Url for deploymentScript in arm template"
+        workingDirectory: '$(System.DefaultWorkingDirectory)/arm-deployment-bundle-percept'
+
+    - task: Bash@3
+      enabled: true
+      displayName: 'Upload the ARM template scripts to temporary container in storage account'
+      env:
+        RELEASE_STORAGE_ACCOUNT_KEY: $(RELEASE_STORAGE_ACCOUNT_KEY)
+        LOGIN_PASSWORD: $(LOGIN_PASSWORD)
+      inputs:
+        targetType: 'inline'
+        script: |
+          # Exit the script on any error
+          set -e
+          echo "Logging into Azure"
+          
+          az login --service-principal --username "$LOGIN_USERNAME" --password "$LOGIN_PASSWORD" --tenant "$TENANT_ID" --output "none"
+          
+          STORAGE_ACCOUNT_ARM_SCRIPTS_CONTAINER_NAME="$RELEASE_STORAGE_ACCOUNT_TEMP_ARM_CONTAINER_NAME"
+          
+          CONTAINER=$(az storage container exists --name "$STORAGE_ACCOUNT_ARM_SCRIPTS_CONTAINER_NAME" --account-name "$RELEASE_STORAGE_ACCOUNT_NAME" --account-key "$RELEASE_STORAGE_ACCOUNT_KEY" -o tsv)
+          
+          if [ "$CONTAINER" == "False" ]; then
+            echo "Creating temp container \"$STORAGE_ACCOUNT_ARM_SCRIPTS_CONTAINER_NAME\" for arm template scripts in storage account"
+          
+            az storage container create \
+            --account-name $(RELEASE_STORAGE_ACCOUNT_NAME) \
+            --account-key $(RELEASE_STORAGE_ACCOUNT_KEY) \
+            --name "$STORAGE_ACCOUNT_ARM_SCRIPTS_CONTAINER_NAME"
+          
+            az storage container set-permission \
+            --account-name $(RELEASE_STORAGE_ACCOUNT_NAME) \
+            --account-key $(RELEASE_STORAGE_ACCOUNT_KEY) \
+            --name "$STORAGE_ACCOUNT_ARM_SCRIPTS_CONTAINER_NAME" \
+            --public-access blob
+          
+            echo "Created temp container \"$STORAGE_ACCOUNT_ARM_SCRIPTS_CONTAINER_NAME\" for arm template scripts in storage account"
+          fi
+          
+          
+          az storage blob upload \
+            --account-name $(RELEASE_STORAGE_ACCOUNT_NAME) \
+            --account-key $(RELEASE_STORAGE_ACCOUNT_KEY) \
+            --container-name "$STORAGE_ACCOUNT_ARM_SCRIPTS_CONTAINER_NAME" \
+            --file arm-internal-deploy-modules-percept.sh \
+            --name arm-internal-deploy-modules-percept.sh
+          
+          echo "Scripts are uploaded to temp storage account container \"$STORAGE_ACCOUNT_ARM_SCRIPTS_CONTAINER_NAME\""
+          
+          az storage blob upload \
+            --account-name $(RELEASE_STORAGE_ACCOUNT_NAME) \
+            --account-key $(RELEASE_STORAGE_ACCOUNT_KEY) \
+            --container-name "$STORAGE_ACCOUNT_ARM_SCRIPTS_CONTAINER_NAME" \
+            --file manifest-bundle-azurepercept.zip \
+            --name azurepercept-bundle.zip
+          
+          # Upload WebApp zip code to temp storage account
+          az storage blob upload \
+            --account-name $(RELEASE_STORAGE_ACCOUNT_NAME) \
+            --account-key $(RELEASE_STORAGE_ACCOUNT_KEY) \
+            --container-name "$STORAGE_ACCOUNT_ARM_SCRIPTS_CONTAINER_NAME" \
+            --file people-detection-app.zip \
+            --name people-detection-app.zip
+
+          az storage blob upload \
+            --account-name $(RELEASE_STORAGE_ACCOUNT_NAME) \
+            --account-key $(RELEASE_STORAGE_ACCOUNT_KEY) \
+            --container-name "$STORAGE_ACCOUNT_ARM_SCRIPTS_CONTAINER_NAME" \
+            --file ARM-template.json \
+            --name ARM-template.json.zip
+          
+          # Writing rgSuffix value to local job variables, so it can be used in ARM template task
+          
+          rgSuffixLocal="$(echo "$(buildSuffix)" | md5sum | cut -c1-4)"
+          echo "##vso[task.setvariable variable=rgSuffix]$rgSuffixLocal"
+        workingDirectory: '$(System.DefaultWorkingDirectory)/arm-deployment-bundle-percept'
+    
+
+    - task: AzureResourceManagerTemplateDeployment@3
+      enabled: true
+      env:
+        SP_PWD: $(SP_PWD)
+        WEBAPP_PASSWORD: $(WEBAPP_PASSWORD)
+      inputs:
+        deploymentScope: 'Subscription'
+        azureResourceManagerConnection: 'AED E2E Subscription'
+        subscriptionId: '7c9469c0-29ac-424a-85ab-d01f2cea1c38'
+        location: 'West US 2'
+        templateLocation: 'Linked artifact'
+        csmFile: '$(System.DefaultWorkingDirectory)/arm-deployment-bundle-percept/ARM-template.json'
+        overrideParameters: '-resourceGroupAMS "$(RESOURCE_GROUP_AMS_ARM)$(rgSuffix)" -resourceGroupDevice "$(RESOURCE_GROUP_DEVICE_ARM)" -existingIotHubName "$(EXISTING_IOTHUB_NAME)" -existingDeviceName "$(EXISTING_DEVICE_NAME)" -servicePrincipalId "$(SP_APPLICATION_ID)" -servicePrincipalObjectId "$(SP_OBJECT_ID)" -servicePrincipalSecret "$(SP_PWD)" -password "$(WEBAPP_PASSWORD)"'
+        deploymentMode: 'Incremental'
+
+    - task: Bash@3
+      enabled: true
+      displayName: 'Delete temporary container for arm template scripts in storage account'
+      env:
+        RELEASE_STORAGE_ACCOUNT_KEY: $(RELEASE_STORAGE_ACCOUNT_KEY)
+        LOGIN_PASSWORD: $(LOGIN_PASSWORD)
+      inputs:
+        targetType: 'inline'
+        script: |
+          echo "Logging into Azure"
+          
+          az login --service-principal --username "$LOGIN_USERNAME" --password "$LOGIN_PASSWORD" --tenant "$TENANT_ID" --output "none"
+          
+          STORAGE_ACCOUNT_ARM_SCRIPTS_CONTAINER_NAME="$RELEASE_STORAGE_ACCOUNT_TEMP_ARM_CONTAINER_NAME"
+          CONTAINER=$(az storage container exists --name "$STORAGE_ACCOUNT_ARM_SCRIPTS_CONTAINER_NAME" --account-name "$RELEASE_STORAGE_ACCOUNT_NAME" --account-key "$RELEASE_STORAGE_ACCOUNT_KEY" -o tsv)
+          
+          if [ "$CONTAINER" == "True" ]; then
+            echo "Deleting temp container  \"$STORAGE_ACCOUNT_ARM_SCRIPTS_CONTAINER_NAME\" for arm template scripts"
+            az storage container delete \
+            --account-name $(RELEASE_STORAGE_ACCOUNT_NAME) \
+            --account-key $(RELEASE_STORAGE_ACCOUNT_KEY) \
+            --name "$STORAGE_ACCOUNT_ARM_SCRIPTS_CONTAINER_NAME"
+
+            echo "Deleted temp container  \"$STORAGE_ACCOUNT_ARM_SCRIPTS_CONTAINER_NAME\" for arm template scripts"
+          fi
+        workingDirectory: '$(System.DefaultWorkingDirectory)'
+    
+   
+- stage: Release
+  jobs:
+  - deployment: 'Release'
+    displayName: 'Release ARM Template to storage account'
+    environment: 'ApproveARMRelease'
+    variables:
+      - group: ${{variables.Variable_Group}}
+    strategy:
+      runOnce:
+        deploy:
+          steps: 
+          - checkout: self
+
+
+          - task: Bash@3
+            enabled: true
+            displayName: 'Delete the resource group of test environment'
+            env:
+              LOGIN_PASSWORD: $(LOGIN_PASSWORD)
+            inputs:
+              targetType: 'inline'
+              script: |
+                # Exit the script on any error
+                set -e
+                
+                echo "Logging to Azure"
+                
+                az login --service-principal --username "$LOGIN_USERNAME" --password "$LOGIN_PASSWORD" --tenant "$TENANT_ID" --output "none"
+                az account set --subscription "$SUBSCRIPTION_ID"
+                rgSuffix="$(echo "$(buildSuffix)" | md5sum | cut -c1-4)"
+                RESOURCE_GROUP_AMS_ARM=$RESOURCE_GROUP_AMS_ARM$rgSuffix
+                MANAGED_IDENTITY=$(az resource list --resource-group "$RESOURCE_GROUP_AMS_ARM" --query "[?type=='Microsoft.ManagedIdentity/userAssignedIdentities'].name" -o tsv)
+                PRINCIPAL_ID=$(az identity list -g "$RESOURCE_GROUP_AMS_ARM" --query "[?name=='$MANAGED_IDENTITY'].principalId" -o tsv)
+                if [ ! -z "$PRINCIPAL_ID" ]; then
+                  IS_ROLE_ASSIGNMENT_NOT_PRESENT=$(az role assignment list --scope "/subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP_DEVICE_ARM" --query "[?principalId=='$PRINCIPAL_ID'].principalId" -o tsv)
+                  if [ ! -z "$IS_ROLE_ASSIGNMENT_NOT_PRESENT" ]; then
+                    az role assignment delete --scope "/subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP_DEVICE_ARM" --assignee "$PRINCIPAL_ID"
+                  fi
+                fi
+                echo "Deleting resource group for IoT Hub \"$RESOURCE_GROUP_AMS_ARM\""
+                GROUP_EXISTS=$(az group exists -n "$RESOURCE_GROUP_AMS_ARM")
+                if [ "$GROUP_EXISTS" == "true" ]; then
+                  az group delete --resource-group "$RESOURCE_GROUP_AMS_ARM" --yes --no-wait
+                  echo "Triggered deletion of resource group \"$RESOURCE_GROUP_AMS_ARM\""
+                fi
+                
+                
+                
+
+
+          - task: DownloadPipelineArtifact@2
+            enabled: true
+            displayName: 'Download artifacts from Build Azure Percept Pipeline'
+            inputs:
+              buildType: 'specific'
+              project: '1ab7de3c-f8b7-4b59-be5a-fa78b4f4570c'
+              definition: '8'
+              buildVersionToDownload: 'latest'
+              targetPath: '$(System.DefaultWorkingDirectory)'
+
+          - task: Bash@3
+            displayName: 'Update links in versioned ARM template and scripts'
+            inputs:
+              targetType: 'inline'
+              script: |
+                # Exit the script on any error
+                
+                echo "Extracting files from artifact zip"
+                 
+                unzip -o arm-deployment-bundle-percept.zip -d .
+                
+                
+                DEPLOY_MODULES_FILENAME="arm-internal-deploy-modules-percept-$(buildSuffix).sh"
+                ARM_TEMPLATE_FILENAME="ARM-template-$(buildSuffix).json"
+                
+                cp ARM-template.json "$ARM_TEMPLATE_FILENAME"
+                
+                cp arm-internal-deploy-modules-percept.sh "$DEPLOY_MODULES_FILENAME"
+                
+                echo "Updating links in versioned ARM template for and scripts"
+                
+                STORAGE_ACCOUNT_ARM_SCRIPTS_CONTAINER_NAME="$RELEASE_STORAGE_ACCOUNT_ARM_CONTAINER_NAME/azure-percept/$(buildSuffix)"
+                
+                MANIFEST_URL="https://${RELEASE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${STORAGE_ACCOUNT_ARM_SCRIPTS_CONTAINER_NAME}/azurepercept-bundle.zip"
+                sed -i 's#^\(SAS_URL[ ]*=\).*#\1\"'"$MANIFEST_URL"'\"#g' "$DEPLOY_MODULES_FILENAME"
+                
+                IS_JQ_INSTALLED=$(apt list --installed | grep -c -w jq)
+                if [ "$IS_JQ_INSTALLED" -eq 0 ]; then
+                    echo "Installing jq"
+                    sudo apt-get install jq
+                    echo "Installed jq"
+                fi
+                
+                echo "Updating Primary scripts Url for deploymentScript in arm template"
+                
+                SCRIPT_URL="https://${RELEASE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${STORAGE_ACCOUNT_ARM_SCRIPTS_CONTAINER_NAME}/arm-internal-deploy-modules-percept.sh"
+                jq --arg a "$SCRIPT_URL" '.resources[8].properties.template.resources[0].properties.primaryScriptUri = $a' "$ARM_TEMPLATE_FILENAME" > "tmp" && mv "tmp" "$ARM_TEMPLATE_FILENAME"
+                
+                SCRIPT_URL="https://${RELEASE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${STORAGE_ACCOUNT_ARM_SCRIPTS_CONTAINER_NAME}/people-detection-app.zip"
+                jq --arg a "$SCRIPT_URL" '.resources[9].properties.template.resources[1].resources[3].properties.packageUri = $a' "$ARM_TEMPLATE_FILENAME" > "tmp" && mv "tmp" "$ARM_TEMPLATE_FILENAME"
+                
+                echo "Updated Primary scripts Url for deploymentScript in arm template"
+              workingDirectory: '$(System.DefaultWorkingDirectory)/arm-deployment-bundle-percept'
+
+          - task: Bash@3
+            displayName: 'Update links in ARM template and scripts'
+            inputs:
+              targetType: 'inline'
+              script: |
+                # Exit the script on any error
+                
+                
+                DEPLOY_MODULES_FILENAME="arm-internal-deploy-modules-percept.sh"
+                ARM_TEMPLATE_FILENAME="ARM-template.json"
+                
+                
+                echo "Updating links in ARM template for and scripts"
+                
+                STORAGE_ACCOUNT_ARM_SCRIPTS_CONTAINER_NAME="$RELEASE_STORAGE_ACCOUNT_ARM_CONTAINER_NAME/azure-percept/latest"
+                
+                MANIFEST_URL="https://${RELEASE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${STORAGE_ACCOUNT_ARM_SCRIPTS_CONTAINER_NAME}/azurepercept-bundle.zip"
+                sed -i 's#^\(SAS_URL[ ]*=\).*#\1\"'"$MANIFEST_URL"'\"#g' "$DEPLOY_MODULES_FILENAME"
+                
+                IS_JQ_INSTALLED=$(apt list --installed | grep -c -w jq)
+                if [ "$IS_JQ_INSTALLED" -eq 0 ]; then
+                    echo "Installing jq"
+                    sudo apt-get install jq
+                    echo "Installed jq"
+                fi
+                
+                echo "Updating Primary scripts Url for deploymentScript in arm template"
+                
+                SCRIPT_URL="https://${RELEASE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${STORAGE_ACCOUNT_ARM_SCRIPTS_CONTAINER_NAME}/arm-internal-deploy-modules-percept.sh"
+                jq --arg a "$SCRIPT_URL" '.resources[8].properties.template.resources[0].properties.primaryScriptUri = $a' "$ARM_TEMPLATE_FILENAME" > "tmp" && mv "tmp" "$ARM_TEMPLATE_FILENAME"
+                
+                SCRIPT_URL="https://${RELEASE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${STORAGE_ACCOUNT_ARM_SCRIPTS_CONTAINER_NAME}/people-detection-app.zip"
+                jq --arg a "$SCRIPT_URL" '.resources[9].properties.template.resources[1].resources[3].properties.packageUri = $a' "$ARM_TEMPLATE_FILENAME" > "tmp" && mv "tmp" "$ARM_TEMPLATE_FILENAME"
+                
+                echo "Updated Primary scripts Url for deploymentScript in arm template"
+              workingDirectory: '$(System.DefaultWorkingDirectory)/arm-deployment-bundle-percept'
+
+
+          - task: Bash@3
+            enabled: true
+            displayName: 'Upload the ARM templates and scripts to release storage account'
+            env:
+              RELEASE_STORAGE_ACCOUNT_KEY: $(RELEASE_STORAGE_ACCOUNT_KEY)
+              LOGIN_PASSWORD: $(LOGIN_PASSWORD)
+            inputs:
+              targetType: 'inline'
+              script: |
+                echo "Logging into Azure"
+                
+                az login --service-principal --username "$LOGIN_USERNAME" --password "$LOGIN_PASSWORD" --tenant "$TENANT_ID" --output "none"
+                
+                if [ "$CREATE_NEW_CONTAINER" == "true" ];then
+                  echo "Creating container \"$RELEASE_STORAGE_ACCOUNT_ARM_CONTAINER_NAME\" in storage account"
+                  
+                  az storage container create \
+                  --account-name $(RELEASE_STORAGE_ACCOUNT_NAME) \
+                  --account-key $(RELEASE_STORAGE_ACCOUNT_KEY) \
+                  --name "$RELEASE_STORAGE_ACCOUNT_ARM_CONTAINER_NAME" \
+                
+                  az storage container set-permission \
+                  --account-name $(RELEASE_STORAGE_ACCOUNT_NAME) \
+                  --account-key $(RELEASE_STORAGE_ACCOUNT_KEY) \
+                  --name "$RELEASE_STORAGE_ACCOUNT_ARM_CONTAINER_NAME" \
+                  --public-access blob
+                fi
+                
+                az storage blob upload \
+                  --account-name $(RELEASE_STORAGE_ACCOUNT_NAME) \
+                  --account-key $(RELEASE_STORAGE_ACCOUNT_KEY) \
+                  --container-name "$RELEASE_STORAGE_ACCOUNT_ARM_CONTAINER_NAME" \
+                  --file arm-internal-deploy-modules-percept.sh \
+                  --name "azure-percept/latest/arm-internal-deploy-modules-percept.sh"
+
+                az storage blob upload \
+                  --account-name $(RELEASE_STORAGE_ACCOUNT_NAME) \
+                  --account-key $(RELEASE_STORAGE_ACCOUNT_KEY) \
+                  --container-name "$RELEASE_STORAGE_ACCOUNT_ARM_CONTAINER_NAME" \
+                  --file arm-internal-deploy-modules-percept-$(buildSuffix).sh \
+                  --name "azure-percept/$(buildSuffix)/arm-internal-deploy-modules-percept.sh"
+                
+                az storage blob lease acquire \
+                  --account-name $(RELEASE_STORAGE_ACCOUNT_NAME) \
+                  --account-key $(RELEASE_STORAGE_ACCOUNT_KEY) \
+                  --container-name "$RELEASE_STORAGE_ACCOUNT_ARM_CONTAINER_NAME" \
+                  --blob-name "azure-percept/$(buildSuffix)/arm-internal-deploy-modules-percept.sh"
+
+                az storage blob upload \
+                  --account-name $(RELEASE_STORAGE_ACCOUNT_NAME) \
+                  --account-key $(RELEASE_STORAGE_ACCOUNT_KEY) \
+                  --container-name "$RELEASE_STORAGE_ACCOUNT_ARM_CONTAINER_NAME" \
+                  --file manifest-bundle-azurepercept.zip \
+                  --name "azure-percept/latest/azurepercept-bundle.zip"
+                
+                az storage blob upload \
+                  --account-name $(RELEASE_STORAGE_ACCOUNT_NAME) \
+                  --account-key $(RELEASE_STORAGE_ACCOUNT_KEY) \
+                  --container-name "$RELEASE_STORAGE_ACCOUNT_ARM_CONTAINER_NAME" \
+                  --file manifest-bundle-azurepercept.zip \
+                  --name "azure-percept/$(buildSuffix)/azurepercept-bundle.zip"
+                
+                az storage blob lease acquire \
+                  --account-name $(RELEASE_STORAGE_ACCOUNT_NAME) \
+                  --account-key $(RELEASE_STORAGE_ACCOUNT_KEY) \
+                  --container-name "$RELEASE_STORAGE_ACCOUNT_ARM_CONTAINER_NAME" \
+                  --blob-name "azure-percept/$(buildSuffix)/azurepercept-bundle.zip"
+
+                az storage blob upload \
+                  --account-name $(RELEASE_STORAGE_ACCOUNT_NAME) \
+                  --account-key $(RELEASE_STORAGE_ACCOUNT_KEY) \
+                  --container-name "$RELEASE_STORAGE_ACCOUNT_ARM_CONTAINER_NAME" \
+                  --file people-detection-app.zip \
+                  --name "azure-percept/latest/people-detection-app.zip"
+                
+                az storage blob upload \
+                  --account-name $(RELEASE_STORAGE_ACCOUNT_NAME) \
+                  --account-key $(RELEASE_STORAGE_ACCOUNT_KEY) \
+                  --container-name "$RELEASE_STORAGE_ACCOUNT_ARM_CONTAINER_NAME" \
+                  --file people-detection-app.zip \
+                  --name "azure-percept/$(buildSuffix)/people-detection-app.zip"
+                
+                az storage blob lease acquire \
+                  --account-name $(RELEASE_STORAGE_ACCOUNT_NAME) \
+                  --account-key $(RELEASE_STORAGE_ACCOUNT_KEY) \
+                  --container-name "$RELEASE_STORAGE_ACCOUNT_ARM_CONTAINER_NAME" \
+                  --blob-name "azure-percept/$(buildSuffix)/people-detection-app.zip"
+                
+                echo "Uploading ARM template to storage account"
+                
+                az storage blob upload \
+                  --account-name $(RELEASE_STORAGE_ACCOUNT_NAME) \
+                  --account-key $(RELEASE_STORAGE_ACCOUNT_KEY) \
+                  --container-name "$RELEASE_STORAGE_ACCOUNT_ARM_CONTAINER_NAME" \
+                  --file ARM-template-$(buildSuffix).json \
+                  --name "azure-percept/$(buildSuffix)/ARM-template-$(buildSuffix).json"
+                
+                az storage blob lease acquire \
+                  --account-name $(RELEASE_STORAGE_ACCOUNT_NAME) \
+                  --account-key $(RELEASE_STORAGE_ACCOUNT_KEY) \
+                  --container-name "$RELEASE_STORAGE_ACCOUNT_ARM_CONTAINER_NAME" \
+                  --blob-name "azure-percept/$(buildSuffix)/ARM-template-$(buildSuffix).json"
+
+                az storage blob upload \
+                  --account-name $(RELEASE_STORAGE_ACCOUNT_NAME) \
+                  --account-key $(RELEASE_STORAGE_ACCOUNT_KEY) \
+                  --container-name "$RELEASE_STORAGE_ACCOUNT_ARM_CONTAINER_NAME" \
+                  --file ARM-template.json \
+                  --name "azure-percept/latest/ARM-template.json"
+              workingDirectory: '$(System.DefaultWorkingDirectory)/arm-deployment-bundle-percept'

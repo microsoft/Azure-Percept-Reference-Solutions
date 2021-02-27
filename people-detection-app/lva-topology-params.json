@@ -1,0 +1,22 @@
+{
+  "@apiVersion" : "2.0",
+  "name": "<TopologyInstanceName>",
+  "properties": {
+    "topologyName": "<TopologyName>",
+    "description": "CVR Topology",
+    "parameters": [
+      {
+        "name": "rtspUrl",
+        "value": "<RTSP URL from .env>"
+      },
+      {
+        "name": "rtspUserName",
+        "value": "username"
+      },
+      {
+        "name": "rtspPassword",
+        "value": "password"
+      }
+    ]
+  }
+}

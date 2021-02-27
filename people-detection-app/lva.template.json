@@ -1,0 +1,158 @@
+{
+  "modulesContent": {
+    "$edgeAgent": {
+      "properties.desired": {
+        "modules": {
+          "lvaEdge": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/media/live-video-analytics:2",
+              "createOptions": {
+                "HostConfig": {
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "2"
+                    }
+                  },
+                  "Binds": [
+                    "$LVA_LOGS_LOCATION:/var/lib/azuremediaservices/logs"
+                  ]
+                }
+              }
+            }
+          },
+          "AzurePerceptModule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "$ACR_NAME/$PRELOAD_AZURE_PERCEPT",
+              "createOptions": {
+                "Cmd": [
+                  "/bin/bash",
+                  "-c",
+                  "./app/inference -s=720p"
+                ],
+                "ExposedPorts": {
+                  "8554/tcp": {}
+                },
+                "Name": "/rtspserver",
+                "HostConfig": {
+                  "Binds": [
+                    "/dev/bus/usb:/dev/bus/usb"
+                  ],
+                  "Privileged": true,
+                  "PortBindings": {
+                    "8554/tcp": [
+                      {
+                        "HostPort": "8554"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "runtime": {
+          "settings": {
+            "minDockerVersion": "v1.25",
+            "registryCredentials": {
+              "rtptofficial": {
+                "address": "$ACR_NAME",
+                "password": "$ACR_PASSWORD",
+                "username": "$ACR_USERNAME"
+              }
+            }
+          },
+          "type": "docker"
+        },
+        "schemaVersion": "1.0",
+        "systemModules": {
+          "edgeAgent": {
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-agent:1.0",
+              "createOptions": ""
+            },
+            "type": "docker"
+          },
+          "edgeHub": {
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-hub:1.0",
+              "createOptions": {
+                "HostConfig": {
+                  "PortBindings": {
+                    "443/tcp": [
+                      {
+                        "HostPort": "443"
+                      }
+                    ],
+                    "5671/tcp": [
+                      {
+                        "HostPort": "5671"
+                      }
+                    ],
+                    "8883/tcp": [
+                      {
+                        "HostPort": "8883"
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always"
+          }
+        }
+      }
+    },
+    "$edgeHub": {
+      "properties.desired": {
+        "routes": {
+          "route": "FROM /messages/* INTO $upstream"
+        },
+        "schemaVersion": "1.0",
+        "storeAndForwardConfiguration": {
+          "timeToLiveSecs": 7200
+        }
+      }
+    },
+    "lvaEdge": {
+      "properties.desired": {
+        "applicationDataDirectory": "/var/lib/azuremediaservices",
+        "azureMediaServicesArmId": "/subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP/providers/microsoft.media/mediaservices/$AMS_ACCOUNT",
+        "aadTenantId": "$AAD_TENANT_ID",
+        "aadServicePrincipalAppId": "$AAD_SERVICE_PRINCIPAL_ID",
+        "aadServicePrincipalSecret": "$AAD_SERVICE_PRINCIPAL_SECRET",
+        "aadEndpoint": "https://login.microsoftonline.com",
+        "aadResourceId": "https://management.core.windows.net/",
+        "armEndpoint": "https://management.azure.com/",
+        "diagnosticsEventsOutputName": "AmsDiagnostics",
+        "operationalEventsOutputName": "AmsOperational",
+        "logLevel": "Information",
+        "logCategories": "Application,Events",
+        "DebugLogsDirectory": "/var/lib/azuremediaservices/logs",
+        "allowUnsecuredEndpoints": true,
+        "telemetryOptOut": false
+      }
+    },
+    "AzurePerceptModule": {
+      "properties.desired": {
+        "Logging": false,
+        "ModelZipUrl": "",
+        "RawStream": true,
+        "ResultStream": true,
+        "Running": true,
+        "TelemetryInterval": 10
+      }
+    }
+  }
+}

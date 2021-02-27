@@ -1,0 +1,65 @@
+# This pipeline builds frontend-app and publishes it as a artifact
+
+variables:
+ uiSource: '$(pwd)/e2e-solutions/people-detection-app/frontend-app/app'
+ uiBuild: '$(uiSource)/build'
+ buildSuffix: '$(Build.BuildNumber)'
+
+trigger:
+  batch: true
+  branches:
+    include:
+      - releases/*
+      - master
+  paths:
+    include:
+    - e2e-solutions/people-detection-app/frontend-app
+    - e2e-solutions/people-detection-app/pipelines/build-frontend.yml
+    - e2e-solutions/people-detection-app/pipelines/deploy-frontend.yml
+
+pool:
+  default
+
+steps:
+- checkout: self
+
+- task: NodeTool@0
+  inputs:
+    versionSpec: '10.x'
+  displayName: 'Install Node.js'
+
+# script for creating build in specific folder
+- script: |
+    pushd $(uiSource)
+    npm install
+    npm run build --prod --nomaps
+    popd
+
+# copying the files from build folder to uesmessagesapp
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: 'e2e-solutions/people-detection-app/frontend-app/app/build'
+    Contents: '**'
+    TargetFolder: 'e2e-solutions/people-detection-app/frontend-app/api/public'
+  displayName: 'npm install and build and copy'
+
+# install dependencies for api
+- script: |
+    pushd $(pwd)/e2e-solutions/people-detection-app/frontend-app/api
+    npm install
+    popd
+
+# creating the zip for app deployment
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: 'e2e-solutions/people-detection-app/frontend-app/api'
+    includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/people-detection-app.zip'
+    replaceExistingArchive: true
+
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: '$(Build.ArtifactStagingDirectory)'
+    artifact: 'ues_app'
+    publishLocation: 'pipeline'

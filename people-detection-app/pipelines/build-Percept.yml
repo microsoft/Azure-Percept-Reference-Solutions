@@ -1,0 +1,121 @@
+# specific branch build with batching
+trigger:
+  batch: true
+  branches:
+    include:
+      - releases/*
+      - master
+  paths:
+    include:
+    - e2e-solutions/people-detection-app
+    - e2e-solutions/people-detection-app/pipelines/build-Percept.yml
+    - e2e-solutions/people-detection-app/pipelines/deploy-Percept.yml
+
+pool:
+  default
+
+variables:
+  ${{ if or(startsWith(variables['Build.SourceBranchName'], 'release'), eq(variables['Build.SourceBranchName'], 'master')) }}:
+    Variable_Group: 'AzurePercept_ReleaseEnvironment'
+  ${{ if and(not(startsWith(variables['Build.SourceBranchName'], 'release')), ne(variables['Build.SourceBranchName'], 'master')) }}:
+     Variable_Group: 'AzurePercept_TestEnvironment'
+
+
+stages:
+- stage: 'Build'
+  jobs:
+  - job: 'Build'
+    variables:
+     - group: ${{variables.Variable_Group}}
+    displayName: 'Build ARM Template'
+    steps:
+    - checkout: self
+
+    - task: Bash@3
+      displayName: 'ShellCheck validation for arm template deployment scripts'
+      inputs:
+        targetType: 'inline'
+        script: |
+          
+          IS_SHELLCHECK_INSTALLED=$(apt list --installed | grep -c -w shellcheck)
+          if [ "$IS_SHELLCHECK_INSTALLED" -eq 0 ]; then
+              echo "Installing shellcheck"
+              sudo apt-get install shellcheck
+              echo "Installed shellcheck"
+          fi
+          
+          # Change directory location to template scripts folder
+          cd e2e-solutions/people-detection-app/
+          
+          # Run shellcheck, Shellcheck will return a list of warnings if the script is not compliant with all the rules
+          # We are checking the result returned by shellcheck.
+          SHELL_CHECK_RESULT_DEPLOY_MODULES=$(shellcheck ./arm-internal-deploy-modules-percept.sh -x)
+          if [ -z "$SHELL_CHECK_RESULT_DEPLOY_MODULES" ]; then
+            echo "Pass: There are no warnings from shellcheck"
+          else
+            echo "The following are the warnings for deploy modules script"
+            echo "$SHELL_CHECK_RESULT_DEPLOY_MODULES"
+            exit 1
+          fi
+        workingDirectory: '$(System.DefaultWorkingDirectory)'
+      
+    - task: DownloadPipelineArtifact@2
+      enabled: true
+      displayName: 'Download artifacts from WebApp Build Pipeline'
+      inputs:
+        buildType: 'specific'
+        project: '1ab7de3c-f8b7-4b59-be5a-fa78b4f4570c'
+        definition: '6'
+        buildVersionToDownload: 'latest'
+        targetPath: '$(System.DefaultWorkingDirectory)'
+
+    - task: CopyFiles@2
+      displayName: 'Copy deployment manifest files to a combined folder'
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)/e2e-solutions/people-detection-app/'
+        Contents: |
+          .env
+          lva-topology-params.json
+          lva-topology.json
+          lva.template.json
+        TargetFolder: '$(System.DefaultWorkingDirectory)/e2e-solutions/people-detection-app/combined'
+    
+    # Creating the manifest bundle zip from combined folder
+    - task: ArchiveFiles@2
+      inputs:
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)/e2e-solutions/people-detection-app/combined'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(System.DefaultWorkingDirectory)/manifest-bundle-azurepercept.zip'
+        replaceExistingArchive: true
+
+    - task: CopyFiles@2
+      displayName: 'Copy deployment manifest files to a combined folder'
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)'
+        Contents: |
+          manifest-bundle-azurepercept.zip
+          ues_app/people-detection-app.zip
+          e2e-solutions/people-detection-app/arm-internal-deploy-modules-percept.sh
+          e2e-solutions/people-detection-app/ARM-template.json
+        TargetFolder: '$(System.DefaultWorkingDirectory)/arm_template_bundle_percept'
+        flattenFolders: true
+
+
+
+    # Creating the ARM Template deployment bundle zip.
+    - task: ArchiveFiles@2
+      inputs:
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)/arm_template_bundle_percept'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/arm-deployment-bundle-percept.zip'
+        replaceExistingArchive: true
+
+
+    # Publishing the pipeline artifact
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)/arm-deployment-bundle-percept.zip'
+        artifact: 'arm-deployment-bundle-percept'
+        publishLocation: 'pipeline'
