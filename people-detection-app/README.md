@@ -11,7 +11,7 @@ This is an open source Percept AI application providing edge-based people counti
 ### Device Requirements
 This application can execute with a physical Percept AI Devkit with Vision SOM.
 
-![People Detector](docs/images/AI-App-Topology.PNG)
+![People Detector](docs/images/AI-App-Topology.png)
 
 # Installation Details
 This reference open source application showcases best practices for AI security, privacy and compliance.  It is intended to be immediately useful for anyone to use with their Percept AI device. 
@@ -68,7 +68,7 @@ To deploy the solution to your Azure Percept with Vision SOM, please enter the f
 
 Once deployment is complete, you can launch the web application by navigating to the `Resource Group AMS` name selected above. You will see an Azure Web Services deployment which starts with `ues-perceptapp` followed by 4 random characters. Select this app, then chose the `Browse` button in the top left:
 
-![Web Application](docs/images/Web-App-Launch.PNG)
+![Web Application](docs/images/Web-App-Launch.png)
 
 Once the application loads, you will need to enter the password you entered at deployment time. The password is cached for subsequent visits to the same application.
 
