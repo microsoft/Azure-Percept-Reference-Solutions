@@ -73,7 +73,7 @@ stages:
           jq --arg a "$SCRIPT_URL" '.resources[8].properties.template.resources[0].properties.primaryScriptUri = $a' ARM-template.json > "tmp" && mv "tmp" ARM-template.json
           
           SCRIPT_URL="https://${RELEASE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${STORAGE_ACCOUNT_ARM_SCRIPTS_CONTAINER_NAME}/people-detection-app.zip"
-          jq --arg a "$SCRIPT_URL" '.resources[9].properties.template.resources[1].resources[3].properties.packageUri = $a' ARM-template.json > "tmp" && mv "tmp" ARM-template.json
+          jq --arg a "$SCRIPT_URL" '.resources[9].properties.template.resources[1].resources[2].properties.packageUri = $a' ARM-template.json > "tmp" && mv "tmp" ARM-template.json
           
           echo "Updated Primary scripts Url for deploymentScript in arm template"
         workingDirectory: '$(System.DefaultWorkingDirectory)/arm-deployment-bundle-percept'
@@ -295,7 +295,7 @@ stages:
                 jq --arg a "$SCRIPT_URL" '.resources[8].properties.template.resources[0].properties.primaryScriptUri = $a' "$ARM_TEMPLATE_FILENAME" > "tmp" && mv "tmp" "$ARM_TEMPLATE_FILENAME"
                 
                 SCRIPT_URL="https://${RELEASE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${STORAGE_ACCOUNT_ARM_SCRIPTS_CONTAINER_NAME}/people-detection-app.zip"
-                jq --arg a "$SCRIPT_URL" '.resources[9].properties.template.resources[1].resources[3].properties.packageUri = $a' "$ARM_TEMPLATE_FILENAME" > "tmp" && mv "tmp" "$ARM_TEMPLATE_FILENAME"
+                jq --arg a "$SCRIPT_URL" '.resources[9].properties.template.resources[1].resources[2].properties.packageUri = $a' "$ARM_TEMPLATE_FILENAME" > "tmp" && mv "tmp" "$ARM_TEMPLATE_FILENAME"
                 
                 echo "Updated Primary scripts Url for deploymentScript in arm template"
               workingDirectory: '$(System.DefaultWorkingDirectory)/arm-deployment-bundle-percept'
@@ -332,7 +332,7 @@ stages:
                 jq --arg a "$SCRIPT_URL" '.resources[8].properties.template.resources[0].properties.primaryScriptUri = $a' "$ARM_TEMPLATE_FILENAME" > "tmp" && mv "tmp" "$ARM_TEMPLATE_FILENAME"
                 
                 SCRIPT_URL="https://${RELEASE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${STORAGE_ACCOUNT_ARM_SCRIPTS_CONTAINER_NAME}/people-detection-app.zip"
-                jq --arg a "$SCRIPT_URL" '.resources[9].properties.template.resources[1].resources[3].properties.packageUri = $a' "$ARM_TEMPLATE_FILENAME" > "tmp" && mv "tmp" "$ARM_TEMPLATE_FILENAME"
+                jq --arg a "$SCRIPT_URL" '.resources[9].properties.template.resources[1].resources[2].properties.packageUri = $a' "$ARM_TEMPLATE_FILENAME" > "tmp" && mv "tmp" "$ARM_TEMPLATE_FILENAME"
                 
                 echo "Updated Primary scripts Url for deploymentScript in arm template"
               workingDirectory: '$(System.DefaultWorkingDirectory)/arm-deployment-bundle-percept'
