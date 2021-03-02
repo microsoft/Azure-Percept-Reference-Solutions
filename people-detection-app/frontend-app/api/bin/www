@@ -21,9 +21,8 @@ app.set('port', port);
 
 var server = http.createServer(app);
 
-
 /**
- * Messages from iothub
+ * Check password
  */
 
 var io = require('socket.io')(server);
@@ -40,40 +39,6 @@ io.on('connection', (socket) => {
       }));
   })
 });
-
-const { EventHubClient, EventPosition } = require('@azure/event-hubs');
-const connectionString = process.env.CUSTOMCONNSTR_EventHub;
-
-let eventHubClient;
-
-EventHubClient
-    .createFromIotHubConnectionString(connectionString)
-    .then((client) => {
-        eventHubClient = client;
-        return eventHubClient.getPartitionIds();
-    })
-    .then((ids) => {
-        console.log("The partition ids are: ", ids);
-        console.log('');
-        return ids.map((id) => {
-            return eventHubClient.receive(
-                id,
-                (message) => {
-                    io.emit('message', JSON.stringify(message));
-                },
-                (error) => {
-                    console.log(error);
-                },
-                {
-                    eventPosition: EventPosition.fromEnqueuedTime(Date.now())
-                });
-        });
-    })
-    .catch((error) => {
-        console.log(error);
-    });
-
-
 
 /**
  * Listen on provided port, on all network interfaces.
