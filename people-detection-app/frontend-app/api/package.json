@@ -19,7 +19,7 @@
     "http-errors": "~1.6.3",
     "morgan": "~1.9.1",
     "pug": "2.0.0-beta11",
-    "socket.io": "^2.3.0",
+    "socket.io": "^2.4.0",
     "ws": "^7.3.0"
   }
 }
