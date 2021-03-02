@@ -1,0 +1,110 @@
+# This pipeline takes the frontend-app build from build pipeline and
+# releases it to a test environment. It then releases it as a artifact after manual approval
+
+trigger: none
+
+resources:
+  pipelines:
+  - pipeline: build
+    project: UnifiedEdgeScenarios
+    source: Build Front End App
+    trigger:
+      enabled: true
+
+
+pool:
+  default
+
+variables:
+  Variable_Group: 'FrontEnd_ReleaseEnvrionment'
+
+stages:
+- stage: Deploy
+  jobs:
+  - job: Deploy
+    variables:
+     - group: ${{variables.Variable_Group}}
+    steps:
+    - checkout: none
+    - download: none
+
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        buildType: 'specific'
+        project: '1ab7de3c-f8b7-4b59-be5a-fa78b4f4570c'
+        definition: '5'
+        buildVersionToDownload: 'latest'
+        artifactName: 'ues_app'
+        targetPath: '$(Pipeline.Workspace)'
+
+    - task: CopyFiles@2
+      inputs:
+        SourceFolder: '$(Pipeline.Workspace)'
+        Contents: 'people-detection-app.zip'
+        TargetFolder: '/home/azureuser/myagent/_work/1/s'
+       
+    - task: Bash@3
+      env:
+          SP_APP_PWD: $(SP_APP_PWD)
+      inputs:
+        targetType: 'inline'
+        script: |
+          # Write your commands here
+          set -e
+          
+          if [ -z $(command -v az) ]; then
+            echo "Installing Azure-cli"
+            curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+            echo "Installed Azure-cli"
+          fi
+          
+          if [[ $(az extension list --query "[?name=='azure-iot'].name" --output tsv | wc -c) -eq 0 ]]; then
+            echo "$(info) Installing azure-iot extension"
+            az extension add --name azure-iot
+          fi
+          WEBAPP_DEPLOYMENT_ZIP="people-detection-app.zip"
+          echo "Attempting login with Service Principal account"
+          az login --service-principal --username "$SP_APP_ID" --password "$SP_APP_PWD" --tenant "$TENANT_ID" --output "none"
+          echo "Login successful"
+          
+          IOTHUB_CONNECTION_STRING="$(az iot hub connection-string show --hub-name "$IOTHUB_NAME" --query "connectionString" --output tsv)"
+          
+          az webapp config connection-string set --connection-string-type Custom --name "$WEBAPP_NAME" --resource-group "$RESOURCE_GROUP" --settings "EventHub=$IOTHUB_CONNECTION_STRING" --output "none"
+          # Turn on web sockets
+          az webapp config set --resource-group "$RESOURCE_GROUP" --name "$WEBAPP_NAME" --web-sockets-enabled true --output "none"
+          
+          echo "Web App settings have been configured"
+          
+          echo "Deploying Web App using \"$WEBAPP_DEPLOYMENT_ZIP\" zip file"
+          # Step to deploy the app to azure
+          az webapp deployment source config-zip --resource-group "$RESOURCE_GROUP" --name "$WEBAPP_NAME" --src "$WEBAPP_DEPLOYMENT_ZIP" --output "none"
+          echo "Deployment is complete"
+        workingDirectory: '/home/azureuser/myagent/_work/1/s'
+
+- stage: Publish
+  jobs:
+  - deployment: 'Publish'
+    displayName: 'Publish_Artifacts'
+    environment: 'ApproveFrontEndRelease'
+    strategy:
+      runOnce:
+        deploy:
+          steps: 
+          - checkout: none
+          - download: none
+
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'specific'
+              project: '1ab7de3c-f8b7-4b59-be5a-fa78b4f4570c'
+              definition: '5'
+              buildVersionToDownload: 'latest'
+              artifactName: 'ues_app'
+              targetPath: '$(Pipeline.Workspace)'
+
+
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: '$(Pipeline.Workspace)/people-detection-app.zip'
+              artifact: 'ues_app'
+              publishLocation: 'pipeline'
