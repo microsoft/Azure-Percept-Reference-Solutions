@@ -1,14 +1,11 @@
 # Project
 
-> This repo has been populated by an initial template to help get you started. Please
-> make sure to update the content to build a great experience for community-building.
+Welcome to the GitHub repo for the Azure Percept reference solutions. 
 
-As the maintainer of this project, please make a few updates:
+If you want to learn more about Azure Percept, please visit [Azure Percept documentation](https://docs.microsoft.com/en-us/azure/azure-percept/) 
+or [product page] (https://azure.microsoft.com/en-us/services/azure-percept/).
 
-- Improving this README.MD file to provide a great experience
-- Updating SUPPORT.MD with content about this project's support experience
-- Understanding the security reporting process in SECURITY.MD
-- Remove this section from the README
+In this repo you'll find examples of end-to-end reference solutions. Each solution has it's own folder with detailed setup instructions.
 
 ## Contributing
 
