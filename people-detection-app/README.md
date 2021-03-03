@@ -1,25 +1,25 @@
-# Open Source People Counting AI Application
+# People Counting reference solution
 			
 ## Overview
 
-This is an open source Percept AI application providing edge-based people counting with user-defined zone entry/exit events. Video and AI output from the on-prem edge device is egressed to Azure Data Lake using Azure Media Service and IoT Hub, with the user interface running as an Azure Website. AI inferencing is provided by Azure Percept for people detection:
+This is an open-source Percept DK reference solution providing edge-based people counting with user-defined zone entry/exit events. Video and AI output from the on-prem edge device is egressed to Azure Data Lake using Azure Media Service and IoT Hub, with the user interface running as an Azure Website. AI inferencing is provided by Azure Percept DK for people detection:
 
 ![People Detector](docs/images/People-Detector-AI.gif)
 
 ## Physical hardware app topology
 
 ### Device Requirements
-This application can execute with a physical Percept AI Devkit with Vision SOM.
+This application requires an Azure Percept DK.
 
 ![People Detector](docs/images/AI-App-Topology.png)
 
 # Installation Details
-This reference open source application showcases best practices for AI security, privacy and compliance.  It is intended to be immediately useful for anyone to use with their Percept AI device. 
+This open-source reference solution showcases best practices for AI security, privacy and compliance.  It is intended to be immediately useful for anyone to use with their Percept DK device. 
 
 ## Prerequisites
 - A service principal with an object id, app id, and secret is required in order to deploy the solution. Please ensure you have the appropriate rights to create such a service principal, or contact your Azure Active Directory Administrator to assist you in creating one. You can follow this [how-to guide](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal) to create the required service principal.
 
-- You must have Owner access on the Azure subscription you wish to deploy to
+- You must have owner access on the Azure subscription you wish to deploy to
 
 - To install this application you must have Owner level access to the target subscription.  This deployment will create resources within the following Azure namespaces. These resource providers must be enabled on the subscription.
     * Microsoft.Devices
@@ -31,11 +31,11 @@ This reference open source application showcases best practices for AI security,
     * Microsoft.Resources
     * Microsoft.Media
 
-- Azure Percept Devkit with Vision SOM attached
+- Azure Percept DK with Vision SOM attached
 
-- You should have already completed the [OOBE instructions](https://github.com/microsoft/Project-Santa-Cruz-Preview/blob/main/user-guides/getting_started/oobe.md). Please make note of the following details as they will be required for deployment.
+- You should have already completed the [Azure Percept DK Setup Experience](https://docs.microsoft.com/en-us/azure/azure-percept/quickstart-percept-dk-set-up). Please make note of the following details as they will be required for deployment.
     * Region of IoT Hub
-    * Resource group name which contains your IoT Hub
+    * Resource group name which contains your Percept DK IoT Hub
     * IoT Hub Name
     * Edge device name
 
@@ -51,19 +51,19 @@ This will redirect you to the Azure portal with this deployment page:
 ![People Detector](docs/images/Custom-Deployment-Percept.png)
 #
 
-To deploy the solution to your Azure Percept with Vision SOM, please enter the following parameters:
+To deploy this reference solution, please enter the following parameters:
 
 | Parameters | Description |
 | ------ | ------ |
 | __Region__ | Name of the region which host your existing Azure IoT Hub. |
-| __Resource Group Device__ | Name of the resource group which host your Azure IoT Hub connected to Azure Percept device. |
+| __Resource Group Device__ | Name of the resource group which host your Azure IoT Hub connected to Azure Percept DK. |
 | __Resource Group AMS__ | Unique name of a new resource group to host Azure Media Service, Azure Data Lake and Front End application. |
-| __Existing IoT Hub Name__ | Name of a the IoT Hub that your Azure Percept device is registered as an edge device. |
-| __Existing Device Name__ | Name of the IoT Edge device in IoT Hub which is connected to Azure Percept device. |
+| __Existing IoT Hub Name__ | Name of a the IoT Hub that your Azure Percept DK device is registered as an edge device. |
+| __Existing Device Name__ | Name of the IoT Edge device in IoT Hub which is connected to Azure Percept DK. |
 | __Service Principal Id__ | Id of an existing Service Principal which will be used in Azure Media Service. |
 | __Service Principal Object Id__ | Object Id of an existing Service Principal which will be used in Azure Media Service. |
 | __Service Principal Secret__ | Secret of an existing Service Principal which will be used in Azure Media Service. |
-| __Password__ | A password to protect access to the web app which visualizes your output. A best practice is to assign a password to prevent others on the internet from seeing the testing output of your Percept AI device. |
+| __Password__ | A password to protect access to the web app which visualizes your output. A best practice is to assign a password to prevent others on the internet from seeing the testing output of your Percept DK. |
 
 
 Once deployment is complete, you can launch the web application by navigating to the `Resource Group AMS` name selected above. You will see an Azure Web Services deployment which starts with `ues-perceptapp` followed by 4 random characters. Select this app, then chose the `Browse` button in the top left:
