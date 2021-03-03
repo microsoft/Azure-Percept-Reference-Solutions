@@ -88,7 +88,6 @@ export class AggregateCountOfPeopleVsTime extends React.Component {
 
     update = () => {
         const aggregateChartMetrics = this.props.aggregateChartMetrics;
-        let time = null;
         let metrics = {
             times: [],
             collisions: [],
@@ -104,7 +103,7 @@ export class AggregateCountOfPeopleVsTime extends React.Component {
             c = c + aggregateChartMetrics.collisions[i];
             count = count + 1;
             totalCount = totalCount + 1;
-            if (count == 60) {
+            if (count === 60) {
                 metrics.times.push(new Date(aggregateChartMetrics.times[i]).toLocaleTimeString('it-IT'));
                 metrics.collisions.push(c);
                 metrics.detections.push(d);
@@ -119,7 +118,7 @@ export class AggregateCountOfPeopleVsTime extends React.Component {
                 c = c + aggregateChartMetrics.collisions[i];
                 count = count + 1;
                 totalCount = totalCount + 1;
-                if (i == l - 1) {
+                if (i === l - 1) {
                     metrics.times.push(new Date(aggregateChartMetrics.times[i]).toLocaleTimeString('it-IT'));
                     metrics.collisions.push(c);
                     metrics.detections.push(d);

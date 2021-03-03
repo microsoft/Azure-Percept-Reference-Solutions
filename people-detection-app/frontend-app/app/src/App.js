@@ -240,7 +240,6 @@ class App extends React.Component {
             }
         });
 
-        let password = "";
         const passwordEncoded = localStorage.getItem("UES-APP-PASSWORD") || "";
         if (passwordEncoded !== "") {
             const passwordDecoded = atob(passwordEncoded);
