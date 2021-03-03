@@ -88,7 +88,7 @@ export class Blob {
                         if (decodedBody && decodedBody !== undefined && decodedBody !== "") {
                             try {
                                 let parsedBody = JSON.parse(decodedBody);
-                                if (parsedBody && parsedBody != undefined && parsedBody != "") {
+                                if (parsedBody && parsedBody !== undefined && parsedBody !== "") {
                                     if (parsedBody.hasOwnProperty('NEURAL_NETWORK')) {
                                         if (parsedBody.NEURAL_NETWORK.length > 0) {
                                             frames.push(parsedBody);

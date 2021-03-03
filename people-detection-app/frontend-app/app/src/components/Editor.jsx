@@ -273,7 +273,7 @@ export class Editor extends React.Component {
 
     distanceFromPointToLineSegment = (point, start, end) => {
         let l2 = Math.pow(start.x - end.x, 2) + Math.pow(start.y - end.y, 2);
-        if (l2 == 0) {
+        if (l2 === 0) {
             return Math.pow(point.x - start.x, 2) + Math.pow(point.y - start.y, 2);
         }
         const t = Math.max(0, Math.min(1, ((point.x - start.x) * (end.x - start.x) + (point.y - start.y) * (end.y - start.y)) / l2));
