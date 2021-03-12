@@ -11,7 +11,7 @@ This is an open-source Percept DK reference solution providing edge-based people
 ### Device Requirements
 This application requires an Azure Percept DK.
 
-![People Detector](docs/images/AI-App-Topology.png)
+![People Detector](docs/images/azure-percept-device.png)
 
 # Installation Details
 This open-source reference solution showcases best practices for AI security, privacy and compliance.  It is intended to be immediately useful for anyone to use with their Percept DK device. 
