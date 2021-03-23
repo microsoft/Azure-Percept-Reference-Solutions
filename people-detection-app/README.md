@@ -21,6 +21,8 @@ This open-source reference solution showcases best practices for AI security, pr
 
 - You must have owner access on the Azure subscription you wish to deploy to
 
+- An Azure Media Services account is required.  Please create an account by following this [quickstart](https://docs.microsoft.com/en-us/azure/media-services/latest/create-account-howto).
+
 - To install this application you must have Owner level access to the target subscription.  This deployment will create resources within the following Azure namespaces. These resource providers must be enabled on the subscription.
     * Microsoft.Devices
     * Microsoft.Authorization
