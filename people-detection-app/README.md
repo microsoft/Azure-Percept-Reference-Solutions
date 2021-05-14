@@ -1,4 +1,7 @@
 # People Counting reference solution
+
+<h2>***This reference solution is currently under a major update in order to simplify the deployment process and to fix some bugs. *** </h2>
+
 			
 ## Overview
 
@@ -44,7 +47,6 @@ This open-source reference solution showcases best practices for AI security, pr
 ## App Deployment
 Deployment starts with this button. Please reference the below details for populating the requested deployment information.
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Funifiededgescenariostest.blob.core.windows.net%2Farm-template%2Fazure-percept%2Flatest%2FARM-template.json)
 
 This will redirect you to the Azure portal with this deployment page:
 
