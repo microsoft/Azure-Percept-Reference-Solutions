@@ -23,9 +23,9 @@
         },
         "existingDeviceName": {
             "type": "String",
-          "metadata": {
-            "description": "Enter the name of existing IoT Edge device (Azure Percept with Vision SoM) on Iot Hub."
-          }
+            "metadata": {
+                "description": "Enter the name of existing IoT Edge device (Azure Percept with Vision SoM) on Iot Hub."
+            }
         },
         "servicePrincipalId": {
             "type": "String",
@@ -150,7 +150,7 @@
                                 "signedPermission": "lr",
                                 "signedExpiry": "[dateTimeAdd(utcNow('u'), 'P1Y')]",
                                 "signedResourceTypes": "sco"
-                            }                            
+                            }
                         },
                         "applicationType": {
                             "type": "String"
@@ -372,7 +372,7 @@
                                                 "events"
                                             ],
                                             "isEnabled": true
-                                        }                                        
+                                        }
                                     ],
                                     "fallbackRoute": {
                                         "name": "$fallback",
@@ -392,38 +392,11 @@
             "resourceGroup": "[parameters('resourceGroupDevice')]"
         },
         {
-          "type": "Microsoft.Authorization/roleDefinitions",
-          "apiVersion": "2018-07-01",
-          "name": "[guid(subscription().id, 'LVAEdgeUserRoleDefinition')]",
-          "properties": {
-            "roleName": "[concat('LVAEdgeUserRoleDefinition',substring(uniqueString(subscription().id),1,3))]",
-            "description": "Can create assets, view list of containers and view Edge policies",
-            "type": "customRole",
-            "isCustom": true,
-            "permissions": [
-              {
-                "actions": [
-                  "Microsoft.Media/mediaservices/assets/listContainerSas/action",
-                  "Microsoft.Media/mediaservices/assets/write",
-                  "Microsoft.Media/mediaservices/listEdgePolicies/action"
-                ],
-                "notActions": []
-              }
-            ],
-            "assignableScopes": [
-              "[subscription().id]"
-            ]
-          }
-        },
-        {
             "type": "Microsoft.Authorization/roleAssignments",
             "apiVersion": "2018-09-01-preview",
-            "name": "[guid(concat(subscription().id, parameters('servicePrincipalId'), 'LVAEdgeUserRoleDefinition'))]",
-            "dependsOn": [
-                "[guid(subscription().id, 'LVAEdgeUserRoleDefinition')]"
-            ],
+            "name": "[guid(concat(subscription().id, parameters('servicePrincipalId'), 'LVAEdgeUserRole'))]",
             "properties": {
-                "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', guid(subscription().id, 'LVAEdgeUserRoleDefinition'))]",
+                "roleDefinitionId": "[concat(resourceGroup().id, '/providers/Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
                 "principalId": "[parameters('servicePrincipalObjectId')]",
                 "scope": "[subscription().id]",
                 "principalType": "ServicePrincipal"
@@ -693,78 +666,78 @@
                             "tags": {
                                 "type": "[parameters('applicationType')]"
                             },
-                          "properties": {
-                            "forceUpdateTag": "1",
-                            "azCliVersion": "2.9.1",
-                            "primaryScriptUri": "https://unifiededgescenarios.blob.core.windows.net/arm-template/azure-percept/latest/arm-internal-deploy-modules-percept.sh",
-                            "supportingScriptUris": [],
-                            "environmentVariables": [
-                              {
-                                "name": "IOTHUB_NAME",
-                                "value": "[parameters('iotHubName')]"
-                              },
-                              {
-                                "name": "STORAGE_ACCOUNT_NAME",
-                                "value": "[parameters('StorageAccountName')]"
-                              },
-                              {
-                                "name": "RESOURCE_GROUP_DEVICE",
-                                "value": "[parameters('resourceGroupDevice')]"
-                              },
-                              {
-                                "name": "RESOURCE_GROUP_AMS",
-                                "value": "[parameters('resourceGroupAMS')]"
-                              },
-                              {
-                                "name": "DEVICE_NAME",
-                                "value": "[parameters('deviceName')]"
-                              },
-                              {
-                                "name": "DEPLOYMENT_NAME",
-                                "value": "[concat(parameters('deploymentName'),parameters('utcValue'))]"
-                              },
-                              {
-                                "name": "IDENTITY_NAME",
-                                "value": "[parameters('managedIdentityName')]"
-                              },
-                              {
-                                "name": "SP_APP_ID",
-                                "value": "[parameters('SP_APP_ID')]"
-                              },
-                              {
-                                "name": "SP_APP_PWD",
-                                "value": "[parameters('SP_APP_PWD')]"
-                              },
-                              {
-                                "name": "TENANT_ID",
-                                "value": "[subscription().tenantId]"
-                              },
-                              {
-                                "name": "SUBSCRIPTION_ID",
-                                "value": "[subscription().subscriptionId]"
-                              },
-                              {
-                                "name": "AMS_ACCOUNT_NAME",
-                                "value": "[parameters('mediaServiceName')]"
-                              },
-                              {
-                                "name": "GRAPH_TOPOLOGY_NAME",
-                                "value": "[parameters('graphTopology')]"
-                              },
-                              {
-                                "name": "GRAPH_INSTANCE_NAME",
-                                "value": "[parameters('graphInstance')]"
-                              },
-                              {
-                                "name": "STREAMING_LOCATOR",
-                                "value": "[parameters('streamingLocator')]"
-                              }
-                            ],
-                            "retentionInterval": "P1D",
-                            "timeout": "PT50M",
-                            "containerSettings": {},
-                            "cleanupPreference": "OnSuccess"
-                          }
+                            "properties": {
+                                "forceUpdateTag": "1",
+                                "azCliVersion": "2.9.1",
+                                "primaryScriptUri": "https://unifiededgescenarios.blob.core.windows.net/arm-template/azure-percept/latest/arm-internal-deploy-modules-percept.sh",
+                                "supportingScriptUris": [],
+                                "environmentVariables": [
+                                    {
+                                        "name": "IOTHUB_NAME",
+                                        "value": "[parameters('iotHubName')]"
+                                    },
+                                    {
+                                        "name": "STORAGE_ACCOUNT_NAME",
+                                        "value": "[parameters('StorageAccountName')]"
+                                    },
+                                    {
+                                        "name": "RESOURCE_GROUP_DEVICE",
+                                        "value": "[parameters('resourceGroupDevice')]"
+                                    },
+                                    {
+                                        "name": "RESOURCE_GROUP_AMS",
+                                        "value": "[parameters('resourceGroupAMS')]"
+                                    },
+                                    {
+                                        "name": "DEVICE_NAME",
+                                        "value": "[parameters('deviceName')]"
+                                    },
+                                    {
+                                        "name": "DEPLOYMENT_NAME",
+                                        "value": "[concat(parameters('deploymentName'),parameters('utcValue'))]"
+                                    },
+                                    {
+                                        "name": "IDENTITY_NAME",
+                                        "value": "[parameters('managedIdentityName')]"
+                                    },
+                                    {
+                                        "name": "SP_APP_ID",
+                                        "value": "[parameters('SP_APP_ID')]"
+                                    },
+                                    {
+                                        "name": "SP_APP_PWD",
+                                        "value": "[parameters('SP_APP_PWD')]"
+                                    },
+                                    {
+                                        "name": "TENANT_ID",
+                                        "value": "[subscription().tenantId]"
+                                    },
+                                    {
+                                        "name": "SUBSCRIPTION_ID",
+                                        "value": "[subscription().subscriptionId]"
+                                    },
+                                    {
+                                        "name": "AMS_ACCOUNT_NAME",
+                                        "value": "[parameters('mediaServiceName')]"
+                                    },
+                                    {
+                                        "name": "GRAPH_TOPOLOGY_NAME",
+                                        "value": "[parameters('graphTopology')]"
+                                    },
+                                    {
+                                        "name": "GRAPH_INSTANCE_NAME",
+                                        "value": "[parameters('graphInstance')]"
+                                    },
+                                    {
+                                        "name": "STREAMING_LOCATOR",
+                                        "value": "[parameters('streamingLocator')]"
+                                    }
+                                ],
+                                "retentionInterval": "P1D",
+                                "timeout": "PT50M",
+                                "containerSettings": {},
+                                "cleanupPreference": "OnSuccess"
+                            }
                         }
                     ],
                     "outputs": {
