@@ -31,7 +31,7 @@ Follow [Unbox and assemble your Azure Percept Devkit components](https://docs.mi
 8. Click **+ Add edge** modules under Egde modules, type a module name
 9. Copy the AVA **provision token** for further use
 
-## Deploy the Eye Module
+## Connect to Azure IoT Hub
 1. Open Visual Studio Code
 2. Select the **AZURE IOT HUB** tab and click **Select IoT Hub**
 
@@ -45,7 +45,7 @@ Follow [Unbox and assemble your Azure Percept Devkit components](https://docs.mi
 
 ![device](docs/images/device.png)
 
-## Generate Manifest and deploy to Percept Devkit
+## Generate Manifest and deploy Eye module and AVA module to Percept Devkit
 1. Click deploy folder > edge folder > envtemplate
 2. Rename file **envtemplate** to **.env**
 3. Fill in the subscription id, resource group, and AVA provision token that you noted down in the previous section
