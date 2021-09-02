@@ -15,10 +15,17 @@ Currently this repo offers-
 * Visual Studio Code - [Download](https://code.visualstudio.com/Download)
 * [Optional - for debugging] Python 3.6+ (Preferably an [Anaconda](https://docs.anaconda.com/anaconda/index.html) release)
 
+# Manual Set up steps
+> Note: For Automatic deployment scroll down to **Deploy Azure resources** section
+
 ## Device Setup
 Follow [Unbox and assemble your Azure Percept Devkit components](https://docs.microsoft.com/en-us/azure/azure-percept/quickstart-percept-dk-unboxing) to setup your device
 
 ## Download code from GitHub
+
+`git clone https://github.com/microsoft/Azure-Percept-Reference-Solutions.git`
+
+The code used in this reference solution is in `percept-dk-ava-samples` folder
 
 ## Create the Azure Video Analyzer Resource
 1. Sign in to the [Azure Portal](https://portal.azure.com)
@@ -57,6 +64,7 @@ Follow [Unbox and assemble your Azure Percept Devkit components](https://docs.mi
 5. Right click the **deployment.ava.percept.amd64.json** and click **Create Deployment for Single Device** and choose your device
 
 ![device-deployment](docs/images/device-deployment.png)
+
 6. Check the Modules under Devices to see if **$edgeAgent**, **$edgeHub**, **azureeyemodule**, and **avaedge** are successfully deployed (running)
 
 ## Create an App Service on the Azure Portal
@@ -164,6 +172,7 @@ Access policies define the permissions and duration of access to a particular vi
 2. In the Visual Studio Code activity bar, select the Azure logo to show the **AZURE APP SERVICE** explorer. Select **Sign into Azure...** and follow the instructions Once signed in, the explorer should show the name of your Azure subscription.
 
 ![login](docs/images/login.png)
+
 3. Under your Subscription, you can drop down to see your App Service that we created in the previous section
 4. To deploy, right click on the App service and select **Deploy to Web App...** option, then select the Web App directory 
 5. Once deployment is successful, go to the App service resource on the Azure Portal. On the **Overview** panel check the **Status** of the service is **Running**. You can access the application by clicking the **URL** or the **Browse** button at the top 
@@ -186,6 +195,24 @@ sudo chown -R 1010:1010 /var/lib/videoanalyzer/
 sudo systemctl start iotedge
 ```
 > Note:  for newer iotedge daemons you may need to replace `iotedge` command with `aziot-edged`.
+
+# Deploy Azure Resources
+> **IMPORTANT**: The following "Deploy to Azure" button will provision the Azure resources listed below and you will begin incurring costs associated with your network and Azure resources immediately as this solution faciliates continuous video recording to the cloud.  To calculate the potential costs, you may wish to use the [pricing calculator](https://azure.microsoft.com/en-us/pricing/calculator/) before you begin and/or have a plan to test in a single resource group that may be deleted after the testing is over.
+
+![Deploy to Azure](https://aka.ms/deploytoazurebutton)
+
+After the script finishes you will have the following Azure resources in a new Resource Group in addition to your existing IoT Hub you specified:
+
+* [Storage Account](https://docs.microsoft.com/azure/storage/common/storage-account-overview) 
+* [Azure Video Analyzer](https://docs.microsoft.com/azure/azure-video-analyzer/overview)
+    * With an active pipeline for video recording running
+* [Container Registry](https://docs.microsoft.com/en-us/azure/container-registry/)
+* [Managed Identities](https://docs.microsoft.com/azure/active-directory/managed-identities-azure-resources/overview)
+* [Azure App Service](https://docs.microsoft.com/en-us/azure/app-service/overview)
+
+> **IMPORTANT**:  To be able to redeploy the AVA modules, you should keep the AVA Provisioning Token for your records (this can not be found after redeploying with alternative deployment manifests).  After deployment, go to the specified IoT Hub (probably in a different resource group) --> IoT Edge --> your device name --> avaedge Module --> Module Identity Twin --> in "properties" --> "desired" --> copy and save "ProvisioningToken".
+
+To view your People Counting application go to your Resource Group, select the App Service you just created and click `Browse` or click the `URL`
 
 ## Credits and References
 * [Azure Percept Documentation](https://docs.microsoft.com/en-us/azure/azure-percept/)
