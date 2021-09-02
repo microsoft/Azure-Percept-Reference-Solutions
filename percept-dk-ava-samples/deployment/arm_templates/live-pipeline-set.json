@@ -1,0 +1,15 @@
+{
+    "@apiVersion": "1.0",
+    "name": "CVR-Pipeline",
+    "properties": {
+        "topologyName": "CVRToVideoSink",
+        "description": "CVR pipeline for person detection",
+        "parameters": [
+            {
+                "name": "rtspUrl",
+                "value": "rtsp://azureeyemodule:8554/h264raw"
+            }                        
+        ]
+    }    
+}
+    
