@@ -1,13 +1,13 @@
-# People Counting Solution with Percept DK and Azure Video Analyzer
+# Continuous Video Recording (CVR) sample with Percept DK and Azure Video Analyzer (AVA)
 
 ## Overview
-The goal of this project is to be able to recognize and count people found on the edge with the Percept Devkit device and Vision SoM camera using Azure Video Analyzer (AVA) as the platform. This video is saved to the cloud with AVA when invoking methods that directly communicate with the edge device for continuous recording.
+The goal of this example is show how to implement CVR with the Percept Devkit device and Vision SoM camera using Azure Video Analyzer (AVA) as the platform. The video is saved to the cloud with AVA when invoking methods that directly communicate with the edge device for continuous recording.
 
-Currently this repo offers- 
+Currently this example offers- 
 
-* Process to deploy Azure Video Analyzer (and Azure Resources), plus edge modules, to the Percept DK and initiate cloud recording 
+* Process to deploy Azure Video Analyzer (and Azure Resources), plus edge modules, to the Percept DK and initiate cloud recording in CVR mode. 
 
-* Azure Web Application to visualize the video stream and see a graphical representation of the people counting in each frame 
+* Azure Web Application to visualize the video stream using AVA widgets. 
 
 ## Prerequisites
 * Azure Percept Devkit - [Purchase](https://www.microsoft.com/en-us/store/build/azure-percept/8v2qxmzbz9vc)
@@ -212,27 +212,8 @@ After the script finishes you will have the following Azure resources in a new R
 
 > **IMPORTANT**:  To be able to redeploy the AVA modules, you should keep the AVA Provisioning Token for your records (this can not be found after redeploying with alternative deployment manifests).  After deployment, go to the specified IoT Hub (probably in a different resource group) --> IoT Edge --> your device name --> avaedge Module --> Module Identity Twin --> in "properties" --> "desired" --> copy and save "ProvisioningToken".
 
-To view your People Counting application go to your Resource Group, select the App Service you just created and click `Browse` or click the `URL`
+To view your application go to your resource group, select the App Service you just created and click `Browse` or click the `URL`
 
 ## Credits and References
 * [Azure Percept Documentation](https://docs.microsoft.com/en-us/azure/azure-percept/)
 * [Azure Video Analyzer Documentation](https://docs.microsoft.com/en-us/azure/azure-video-analyzer/video-analyzer-docs/)
-
-## Additional notes
-
-The Vision SoM on the Percept DK returns json in the format:
-
-```json
-{
-  "NEURAL_NETWORK": [
-    {
-      "bbox": [0.404, 0.369, 0.676, 0.984],
-      "label": "person",
-      "confidence": "0.984375",
-      "timestamp": "1626991877400034126"
-    }
-  ]
-}
-```
-
-Here, with the simple http server (`simpleserver` module), an advanced feature, we sync it in the correct format for AVA.
