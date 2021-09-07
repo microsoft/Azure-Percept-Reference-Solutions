@@ -165,6 +165,7 @@ Access policies define the permissions and duration of access to a particular vi
 1. Using the `cd` command go to the `ava_app` folder
 2. Execute command `python main.py --action start --type cvr`
 3. Check the pipeline in the video analyzer extension, you can see CVR-Pipeline has been activated.
+
 ![cvr-activate](docs/images/cvr-activate.png)
 
 ## Deploy the Web App to Azure
@@ -182,6 +183,7 @@ Access policies define the permissions and duration of access to a particular vi
 2. Execute command `python main.py --action stop --type cvr`
 ![terminal](docs/images/terminal.png)
 3. Check the pipeline in the video analyzer extension, you can see CVR-Pipeline has been deactivated
+
 ![cvr-deactivate](docs/images/cvr-deactivate.png)
 
 ## Troubleshooting
