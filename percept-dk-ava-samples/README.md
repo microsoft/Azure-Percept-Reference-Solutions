@@ -53,7 +53,7 @@ The code used in this reference solution is in `percept-dk-ava-samples` folder
 ![device](docs/images/device.png)
 
 ## Generate Manifest and deploy Eye module and AVA module to Percept Devkit
-1. Click deploy folder > edge folder > envtemplate
+1. Open deployment > edge > envtemplate file
 2. Rename file **envtemplate** to **.env**
 3. Fill in the subscription id, resource group, and AVA provision token that you noted down in the previous section
 4. Right click the **deployment.ava.percept.template.json** and click **Generate IoT Edge Deployment Manifest**. After that, you will see **deployment.ava.percept.template.json** under the **config** folder
