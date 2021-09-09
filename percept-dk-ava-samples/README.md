@@ -165,6 +165,7 @@ Access policies define the permissions and duration of access to a particular vi
 1. Using the `cd` command go to the `ava_app` folder
 2. Execute command `python main.py --action start --type cvr`
 3. Check the pipeline in the video analyzer extension, you can see CVR-Pipeline has been activated.
+
 ![cvr-activate](docs/images/cvr-activate.png)
 
 ## Deploy the Web App to Azure
@@ -182,6 +183,7 @@ Access policies define the permissions and duration of access to a particular vi
 2. Execute command `python main.py --action stop --type cvr`
 ![terminal](docs/images/terminal.png)
 3. Check the pipeline in the video analyzer extension, you can see CVR-Pipeline has been deactivated
+
 ![cvr-deactivate](docs/images/cvr-deactivate.png)
 
 ## Troubleshooting
@@ -199,7 +201,7 @@ sudo systemctl start iotedge
 # Deploy Azure Resources
 > **IMPORTANT**: The following "Deploy to Azure" button will provision the Azure resources listed below and you will begin incurring costs associated with your network and Azure resources immediately as this solution faciliates continuous video recording to the cloud.  To calculate the potential costs, you may wish to use the [pricing calculator](https://azure.microsoft.com/en-us/pricing/calculator/) before you begin and/or have a plan to test in a single resource group that may be deleted after the testing is over.
 
-![Deploy to Azure](https://aka.ms/deploytoazurebutton)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https://raw.githubusercontent.com/microsoft/Azure-Percept-Reference-Solutions/main/percept-dk-ava-samples/deployment/arm_templates/start.deploy.json)
 
 After the script finishes you will have the following Azure resources in a new Resource Group in addition to your existing IoT Hub you specified:
 
