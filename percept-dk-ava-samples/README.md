@@ -148,7 +148,7 @@ Access policies define the permissions and duration of access to a particular vi
 ## Set up CVR Pipeline
 1. Python Setup
     * Open Command Prompt or Click Terminal at the bottom of the VS Code window
-    * Using the `cd` command go to the folder containing the `requirements.txt` file
+    * Using the `cd` command go to the folder ava_app containing the `requirements.txt` file
     * Enter command `pip install -r requirements.txt`
 2. Fill in the Connection String and Device ID in `appsettings.json`
     * Create a file called `appsettings.json` under the `ava_app` folder
