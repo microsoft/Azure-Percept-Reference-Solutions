@@ -24,7 +24,7 @@
         {
             "opName": "pipelineTopologySet",
             "opParams": {
-                "pipelineTopologyFile": "topology_cvr.json"
+                "pipelineTopologyUrl": "https://raw.githubusercontent.com/Azure/video-analyzer/main/pipelines/live/topologies/cvr-video-sink/topology.json"
             }
         },
         {
