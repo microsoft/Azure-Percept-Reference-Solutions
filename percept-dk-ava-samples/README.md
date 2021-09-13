@@ -9,6 +9,9 @@ Currently this example offers-
 
 * Azure Web Application to visualize the video stream using AVA widgets. 
 
+![people count](docs/images/people-counting.gif)
+
+
 ## Prerequisites
 * Azure Percept Devkit - [Purchase](https://www.microsoft.com/en-us/store/build/azure-percept/8v2qxmzbz9vc)
 * Azure Subscription - [Free Trial Account](https://azure.microsoft.com/en-us/free/)
