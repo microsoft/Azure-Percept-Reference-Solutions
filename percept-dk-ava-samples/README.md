@@ -201,7 +201,7 @@ sudo systemctl start iotedge
 # Deploy Azure Resources
 > **IMPORTANT**: The following "Deploy to Azure" button will provision the Azure resources listed below and you will begin incurring costs associated with your network and Azure resources immediately as this solution faciliates continuous video recording to the cloud.  To calculate the potential costs, you may wish to use the [pricing calculator](https://azure.microsoft.com/en-us/pricing/calculator/) before you begin and/or have a plan to test in a single resource group that may be deleted after the testing is over.
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https://raw.githubusercontent.com/microsoft/Azure-Percept-Reference-Solutions/main/percept-dk-ava-samples/deployment/arm_templates/start.deploy.json)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FAzure-Percept-Reference-Solutions%2Fmain%2Fpercept-dk-ava-samples%2Fdeployment%2Farm_templates%2Fstart.deploy.json)
 
 After the script finishes you will have the following Azure resources in a new Resource Group in addition to your existing IoT Hub you specified:
 
