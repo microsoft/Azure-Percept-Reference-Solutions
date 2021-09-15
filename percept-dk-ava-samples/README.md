@@ -9,7 +9,7 @@ Currently this example offers-
 
 * Azure Web Application to visualize the video stream using AVA widgets. 
 
-![people count](docs/images/people-counting.gif)
+![people count](docs/images/people-counting-updated.gif)
 
 
 ## Prerequisites
