@@ -2,8 +2,6 @@
 SUBSCRIPTION_ID=<Azure subscription id>
 RESOUCE_GROUP=<Resource Group for AVA>
 AVA_PROVISIONING_TOKEN=<AVA provisioning token found in the avaedge Module Twin properties>
-CONTAINER_REGISTRY_USERNAME_myacr=<optional>
-CONTAINER_REGISTRY_PASSWORD_myacr=<optional>
 
 # If changing the following, ensure the paths exist with the proper permissions on the device
 VIDEO_INPUT_FOLDER_ON_DEVICE=/home/localedgeuser/samples/input
