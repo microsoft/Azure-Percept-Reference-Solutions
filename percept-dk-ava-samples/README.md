@@ -147,6 +147,12 @@ Access policies define the permissions and duration of access to a particular vi
         * Value - Use the **Token** value that we generated in a previous section
     * **VIDEO_NAME**
         * Value - Use the video name that you want the Azure Video Analyzer widget to access
+    * **SCM_DO_BUILD_DURING_DEPLOYMENT**
+        * Value - **True**
+    * **WEBSITE_HTTPLOGGING_RETENTION_DAYS**
+        * Value - **7**
+    * **WEBSITE_NODE_DEFAULT_VERSION**
+        * Value - **~14**
 
 ## Set up CVR Pipeline
 1. Python Setup
@@ -175,10 +181,12 @@ Access policies define the permissions and duration of access to a particular vi
 1. In the terminal, make sure you are in the project folder, then start Visual Studio Code with the following command- `code .` 
 2. In the Visual Studio Code activity bar, select the Azure logo to show the **AZURE APP SERVICE** explorer. Select **Sign into Azure...** and follow the instructions Once signed in, the explorer should show the name of your Azure subscription.
 
+
 ![login](docs/images/login.png)
 
 3. Under your Subscription, you can drop down to see your App Service that we created in the previous section
 4. To deploy, right click on the App service and select **Deploy to Web App...** option, then select the Web App directory 
+> Note: if the deployment fails, go to App Service Configuration settings on Azure Portal and remove **SCM_DO_BUILD_DURING_DEPLOYMENT** and try again.
 5. Once deployment is successful, go to the App service resource on the Azure Portal. On the **Overview** panel check the **Status** of the service is **Running**. You can access the application by clicking the **URL** or the **Browse** button at the top 
 
 ## Deactivate CVR Pipeline
@@ -204,7 +212,7 @@ sudo systemctl start iotedge
 # Deploy Azure Resources
 > **IMPORTANT**: The following "Deploy to Azure" button will provision the Azure resources listed below and you will begin incurring costs associated with your network and Azure resources immediately as this solution faciliates continuous video recording to the cloud.  To calculate the potential costs, you may wish to use the [pricing calculator](https://azure.microsoft.com/en-us/pricing/calculator/) before you begin and/or have a plan to test in a single resource group that may be deleted after the testing is over.
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FAzure-Percept-Reference-Solutions%2Fmain%2Fpercept-dk-ava-samples%2Fdeployment%2Farm_templates%2Fstart.deploy.json)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FAzure-Percept-Reference-Solutions%2Fmain%2Fpercept-dk-ava-samples%2Fdeployment%2Farm_templates%2Fstart.deploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FAzure-Percept-Reference-Solutions%2Fmain%2Fpercept-dk-ava-samples%2Fdeployment%2Farm_templates%2Fform.json)
 
 After the script finishes you will have the following Azure resources in a new Resource Group in addition to your existing IoT Hub you specified:
 
