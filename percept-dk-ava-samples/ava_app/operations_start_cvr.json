@@ -1,0 +1,78 @@
+{
+    "apiVersion": "1.0",
+    "operations": [
+        {
+            "opName": "pipelineTopologyList",
+            "opParams": {}
+        },
+        {
+            "opName": "WaitForInput",
+            "opParams": {
+                "message": "Press Enter to continue"
+            }
+        },
+        {
+            "opName": "livePipelineList",
+            "opParams": {}
+        },
+        {
+            "opName": "WaitForInput",
+            "opParams": {
+                "message": "Press Enter to set the topology, set the pipeline and activate the pipeline."
+            }
+        },
+        {
+            "opName": "pipelineTopologySet",
+            "opParams": {
+                "pipelineTopologyUrl": "https://raw.githubusercontent.com/Azure/video-analyzer/main/pipelines/live/topologies/cvr-video-sink/topology.json"
+            }
+        },
+        {
+            "opName": "livePipelineSet",
+            "opParams": {
+                "name": "CVR-Pipeline",
+                "properties": {
+                    "topologyName": "CVRToVideoSink",
+                    "description": "Sample pipeline description",
+                    "parameters": [
+                        {
+                            "name": "rtspUrl",
+                            "value": "rtsp://azureeyemodule:8554/h264raw"
+                        },
+                        {
+                            "name": "rtspUserName",
+                            "value": "testuser"
+                        },
+                        {
+                            "name": "rtspPassword",
+                            "value": "testpassword"
+                        }                                         
+                    ]
+                }
+            }
+        },
+        {
+            "opName": "livePipelineActivate",
+            "opParams": {
+                "name": "CVR-Pipeline"
+            }
+        },
+        {
+            "opName": "livePipelineList",
+            "opParams": {}
+        },
+        {
+            "opName": "WaitForInput",
+            "opParams": {
+                "message": "The livePipeline has been activated."
+            }
+        },
+        {
+            "opName": "WaitForInput",
+            "opParams": {
+                "message": "Press Enter to continue"
+            }
+        }
+    ]
+}
+    

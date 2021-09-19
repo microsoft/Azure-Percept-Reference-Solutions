@@ -1,13 +1,16 @@
-# People Counting Solution with Percept DK and Azure Video Analyzer
+# Continuous Video Recording (CVR) sample with Percept DK and Azure Video Analyzer (AVA)
 
 ## Overview
-The goal of this project is to be able to recognize and count people found on the edge with the Percept Devkit device and Vision SoM camera using Azure Video Analyzer (AVA) as the platform. This video is saved to the cloud with AVA when invoking methods that directly communicate with the edge device for continuous recording.
+The goal of this example is show how to implement CVR with the Percept Devkit device and Vision SoM camera using Azure Video Analyzer (AVA) as the platform. The video is saved to the cloud with AVA when invoking methods that directly communicate with the edge device for continuous recording.
 
-Currently this repo offers- 
+Currently this example offers- 
 
-* Process to deploy Azure Video Analyzer (and Azure Resources), plus edge modules, to the Percept DK and initiate cloud recording 
+* Process to deploy Azure Video Analyzer (and Azure Resources), plus edge modules, to the Percept DK and initiate cloud recording in CVR mode. 
 
-* Azure Web Application to visualize the video stream and see a graphical representation of the people counting in each frame 
+* Azure Web Application to visualize the video stream using AVA widgets. 
+
+![people count](docs/images/people-counting-gif.gif)
+
 
 ## Prerequisites
 * Azure Percept Devkit - [Purchase](https://www.microsoft.com/en-us/store/build/azure-percept/8v2qxmzbz9vc)
@@ -38,7 +41,7 @@ The code used in this reference solution is in `percept-dk-ava-samples` folder
 8. Click **+ Add edge** modules under Egde modules, type a module name
 9. Copy the AVA **provision token** for further use
 
-## Deploy the Eye Module
+## Connect to Azure IoT Hub
 1. Open Visual Studio Code
 2. Select the **AZURE IOT HUB** tab and click **Select IoT Hub**
 
@@ -52,8 +55,8 @@ The code used in this reference solution is in `percept-dk-ava-samples` folder
 
 ![device](docs/images/device.png)
 
-## Generate Manifest and deploy to Percept Devkit
-1. Click deploy folder > edge folder > envtemplate
+## Generate Manifest and deploy Eye module and AVA module to Percept Devkit
+1. Open deployment > edge > envtemplate file
 2. Rename file **envtemplate** to **.env**
 3. Fill in the subscription id, resource group, and AVA provision token that you noted down in the previous section
 4. Right click the **deployment.ava.percept.template.json** and click **Generate IoT Edge Deployment Manifest**. After that, you will see **deployment.ava.percept.template.json** under the **config** folder
@@ -144,11 +147,17 @@ Access policies define the permissions and duration of access to a particular vi
         * Value - Use the **Token** value that we generated in a previous section
     * **VIDEO_NAME**
         * Value - Use the video name that you want the Azure Video Analyzer widget to access
+    * **SCM_DO_BUILD_DURING_DEPLOYMENT**
+        * Value - **True**
+    * **WEBSITE_HTTPLOGGING_RETENTION_DAYS**
+        * Value - **7**
+    * **WEBSITE_NODE_DEFAULT_VERSION**
+        * Value - **~14**
 
 ## Set up CVR Pipeline
 1. Python Setup
     * Open Command Prompt or Click Terminal at the bottom of the VS Code window
-    * Using the `cd` command go to the folder containing the `requirements.txt` file
+    * Using the `cd` command go to the folder ava_app containing the `requirements.txt` file
     * Enter command `pip install -r requirements.txt`
 2. Fill in the Connection String and Device ID in `appsettings.json`
     * Create a file called `appsettings.json` under the `ava_app` folder
@@ -172,10 +181,12 @@ Access policies define the permissions and duration of access to a particular vi
 1. In the terminal, make sure you are in the project folder, then start Visual Studio Code with the following command- `code .` 
 2. In the Visual Studio Code activity bar, select the Azure logo to show the **AZURE APP SERVICE** explorer. Select **Sign into Azure...** and follow the instructions Once signed in, the explorer should show the name of your Azure subscription.
 
+
 ![login](docs/images/login.png)
 
 3. Under your Subscription, you can drop down to see your App Service that we created in the previous section
 4. To deploy, right click on the App service and select **Deploy to Web App...** option, then select the Web App directory 
+> Note: if the deployment fails, go to App Service Configuration settings on Azure Portal and remove **SCM_DO_BUILD_DURING_DEPLOYMENT** and try again.
 5. Once deployment is successful, go to the App service resource on the Azure Portal. On the **Overview** panel check the **Status** of the service is **Running**. You can access the application by clicking the **URL** or the **Browse** button at the top 
 
 ## Deactivate CVR Pipeline
@@ -201,7 +212,7 @@ sudo systemctl start iotedge
 # Deploy Azure Resources
 > **IMPORTANT**: The following "Deploy to Azure" button will provision the Azure resources listed below and you will begin incurring costs associated with your network and Azure resources immediately as this solution faciliates continuous video recording to the cloud.  To calculate the potential costs, you may wish to use the [pricing calculator](https://azure.microsoft.com/en-us/pricing/calculator/) before you begin and/or have a plan to test in a single resource group that may be deleted after the testing is over.
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https://raw.githubusercontent.com/microsoft/Azure-Percept-Reference-Solutions/main/percept-dk-ava-samples/deployment/arm_templates/start.deploy.json)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FAzure-Percept-Reference-Solutions%2Fmain%2Fpercept-dk-ava-samples%2Fdeployment%2Farm_templates%2Fstart.deploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FAzure-Percept-Reference-Solutions%2Fmain%2Fpercept-dk-ava-samples%2Fdeployment%2Farm_templates%2Fform.json)
 
 After the script finishes you will have the following Azure resources in a new Resource Group in addition to your existing IoT Hub you specified:
 
@@ -214,27 +225,8 @@ After the script finishes you will have the following Azure resources in a new R
 
 > **IMPORTANT**:  To be able to redeploy the AVA modules, you should keep the AVA Provisioning Token for your records (this can not be found after redeploying with alternative deployment manifests).  After deployment, go to the specified IoT Hub (probably in a different resource group) --> IoT Edge --> your device name --> avaedge Module --> Module Identity Twin --> in "properties" --> "desired" --> copy and save "ProvisioningToken".
 
-To view your People Counting application go to your Resource Group, select the App Service you just created and click `Browse` or click the `URL`
+To view your application go to your resource group, select the App Service you just created and click `Browse` or click the `URL`
 
 ## Credits and References
 * [Azure Percept Documentation](https://docs.microsoft.com/en-us/azure/azure-percept/)
 * [Azure Video Analyzer Documentation](https://docs.microsoft.com/en-us/azure/azure-video-analyzer/video-analyzer-docs/)
-
-## Additional notes
-
-The Vision SoM on the Percept DK returns json in the format:
-
-```json
-{
-  "NEURAL_NETWORK": [
-    {
-      "bbox": [0.404, 0.369, 0.676, 0.984],
-      "label": "person",
-      "confidence": "0.984375",
-      "timestamp": "1626991877400034126"
-    }
-  ]
-}
-```
-
-Here, with the simple http server (`simpleserver` module), an advanced feature, we sync it in the correct format for AVA.

@@ -1,0 +1,4 @@
+# For AVA app
+certifi==2020.12.5
+azure-iot-device==2.7.0
+azure-iot-hub==2.4.0
