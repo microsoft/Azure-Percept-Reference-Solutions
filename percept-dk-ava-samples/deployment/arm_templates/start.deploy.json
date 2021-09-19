@@ -1,10 +1,13 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
+	"metadata": {
+		"description": "This template orchestrates a deployment of Azure Video Analyzer (AVA) and the supporting resources needed for running most official samples. It is a subscription level deployment and uses both nested and linked templates for scope and modularity."
+	},
     "parameters": {
 		"resourceGroup": {
             "type": "string",
-            "defaultValue": "rg-people-counting-percept-dk",
+            "defaultValue": "rg-percept-dk-ava-cvr-sample",
             "metadata": {
                 "description": "The name of the resource group for deploying new resources."
             }
@@ -49,13 +52,13 @@
             "type": "object",
             "defaultValue": {
                 "device": "percept-dk",
-                "sample": "people-counting-with-ava-percept-dk"            }
+                "sample": "percept-dk-ava-cvr-sample"            }
         },
         "namePrefix": {
             "metadata": {
                 "description": "Used to qualify the names of all of the resources created in this template."
             },
-            "defaultValue": "people-counting",
+            "defaultValue": "percept-dk-ava-cvr-sample",
             "type": "string",
             "minLength": 3,
             "maxLength": 11
@@ -74,10 +77,9 @@
         "managedIdentityId": "[concat(subscription().id,'/resourceGroups/',parameters('resourceGroup'),'/providers/Microsoft.ManagedIdentity/userAssignedIdentities/', variables('managedIdentityName'))]",
         "simulatedDeviceName": "[concat(parameters('namePrefix'),'-iot-edge-device')]",
         "deviceName": "[if(parameters('useExistingEdgeDevice'),parameters('existingDeviceName'),variables('simulatedDeviceName'))]",
-		"applicationType": "people-counting-percept-dk",
-		"webappName": "[concat('people-counting-percept-dk-app',substring(uniqueString(subscription().id,parameters('resourceGroup')),1,4))]",
-		"appServiceName": "[concat('people-counting-percept-dk-asp',substring(uniqueString(subscription().id,parameters('resourceGroup')),1,4))]",
-		"location": "[deployment().location]"
+		"applicationType": "percept-dk-ava-cvr-sample",
+		"webappName": "[concat('percept-dk-ava-cvr-sample',substring(uniqueString(subscription().id,parameters('resourceGroup')),1,4))]",
+		"appServiceName": "[concat('percept-dk-ava-cvr-sample-asp',substring(uniqueString(subscription().id,parameters('resourceGroup')),1,4))]"
     },
     "resources": [
 		{
@@ -522,7 +524,7 @@
                             "type": "Microsoft.Web/serverfarms",
                             "apiVersion": "2018-02-01",
                             "name": "[variables('appServiceName')]",
-                            "location": "[variables('location')]",
+                            "location": "[deployment().location]",
                             "sku": {
                                 "name": "S1",
                                 "tier": "Standard",
@@ -549,12 +551,12 @@
                             "type": "Microsoft.Web/sites",
                             "apiVersion": "2018-11-01",
                             "name": "[variables('webappName')]",
-                            "location": "[variables('location')]",
+                            "location": "[deployment().location]",
                             "dependsOn": [
                                 "[variables('appServiceName')]"
                             ],
                             "tags": {
-                                "edgeAIAppDeployment": "people-counting-percept-dk-app",
+                                "edgeAIAppDeployment": "percept-dk-ava-cvr-sample-app",
                                 "type": "[variables('applicationType')]"
                             },
                             "kind": "app",
@@ -623,12 +625,12 @@
                                     "type": "Extensions",
                                     "apiVersion": "2018-11-01",
                                     "name": "MSDeploy",
-                                    "location": "[variables('location')]",
+                                    "location": "[deployment().location]",
                                     "dependsOn": [
                                         "[variables('webappName')]"
                                     ],
                                     "properties": {
-                                        "packageUri": "[uri(variables('_artifactsLocation'),'people-counting-percept-app.zip')]"
+                                        "packageUri": "[uri(variables('_artifactsLocation'),'percept-dk-ava-cvr-sample-app.zip')]"
                                     }
                                 }
                             ]
