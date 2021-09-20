@@ -219,7 +219,7 @@ To deploy this reference solution, please enter the following parameters:
 
 |Parameter|Required (Y/N)|Description|
 |---|---|---|
-|__Region__|Y|Region to use for template deployment. This is currently restricted to regions which support the NCasT4_V3 virtual machines. Please check [Azure Products by Region](https://azure.microsoft.com/en-us/global-infrastructure/services/?products=virtual-machines&regions=all) for region availability.|
+|__Region__|Y|Region to use for template deployment.|
 |__Resource Group__|Y|The name of the resource group for deploying new resources|
 
 Once you have filled all required fields above click **Next** at the bottom of the screen to see the **Edge Device Settings** as follows:
