@@ -216,7 +216,7 @@ sudo systemctl start iotedge
 
 This will redirect you to the Azure portal with this deployment page:
 
-![deployment-1](docs/images/deployment-1.png)
+![deployment-1](docs/images/deployment-1.PNG)
 
 To deploy this reference solution, please enter the following parameters:
 
@@ -227,7 +227,7 @@ To deploy this reference solution, please enter the following parameters:
 
 Once you have filled all required fields above click **Next** at the bottom of the screen to see the **Edge Device Settings** as follows:
 
-![deployment-2](docs/images/deployment-2.png)
+![deployment-2](docs/images/deployment-2.PNG)
 
 |Parameter|Required (Y/N)|Description|
 |---|---|---|
