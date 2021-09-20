@@ -211,6 +211,27 @@ sudo systemctl start iotedge
 
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FAzure-Percept-Reference-Solutions%2Fmain%2Fpercept-dk-ava-samples%2Fdeployment%2Farm_templates%2Fstart.deploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FAzure-Percept-Reference-Solutions%2Fmain%2Fpercept-dk-ava-samples%2Fdeployment%2Farm_templates%2Fform.json)
 
+This will redirect you to the Azure portal with this deployment page:
+
+![deployment-1](docs/images/deployment-1.png)
+
+To deploy this reference solution, please enter the following parameters:
+
+|Parameter|Required (Y/N)|Description|
+|---|---|---|
+|__Region__|Y|Region to use for template deployment. This is currently restricted to regions which support the NCasT4_V3 virtual machines. Please check [Azure Products by Region](https://azure.microsoft.com/en-us/global-infrastructure/services/?products=virtual-machines&regions=all) for region availability.|
+|__Resource Group__|Y|The name of the resource group for deploying new resources|
+
+Once you have filled all required fields above click **Next** at the bottom of the screen to see the **Edge Device Settings** as follows:
+
+![deployment-2](docs/images/deployment-2.png)
+
+|Parameter|Required (Y/N)|Description|
+|---|---|---|
+|__Existing IoT Hub Name__|Y|An existing IoT Hub withing the resource group you mentioned in the previous step|
+|__Existing Device Name__|Y|An existing edge device that is already registered with the specified existing IoT Hub|
+
+
 After the script finishes you will have the following Azure resources in a new Resource Group in addition to your existing IoT Hub you specified:
 
 * [Storage Account](https://docs.microsoft.com/azure/storage/common/storage-account-overview) 
