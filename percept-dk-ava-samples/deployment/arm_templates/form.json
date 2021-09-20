@@ -62,27 +62,9 @@
                 "visible": false
             },
             {
-                "name": "useExistingEdgeDevice",
-                "type": "Microsoft.Common.DropDown",
-                "label": "Do you need an edge device?",
-                "toolTip": "This will override any module currently deployed to the device.",
-                "constraints": {
-                    "allowedValues": [
-                        {
-                            "label": "Deploy a simulated edge device",
-                            "value": "simulated"
-                        },
-                        {
-                            "label": "Use an existing edge device",
-                            "value": "existing"
-                        }
-                    ]
-                }
-            },
-            {
                 "name": "useExistingEdgeDeviceWarning",
                 "type": "Microsoft.Common.InfoBox",
-                "visible": "[contains(basics('useExistingEdgeDevice'),'existing')]",
+                "visible": true,
                 "options": {
                     "icon": "Warning",
                     "text": "You will need to provide the name of the existing edge device and select the IoT Hub where it is registered. Also note, that this will override the modules deployed to the edge device."
@@ -94,57 +76,6 @@
                 "name": "edgeDeviceSettings",
                 "label": "Edge Device Settings",
                 "elements": [
-                    {
-                        "name": "simulatedDeviceSection",
-                        "label": "Simulated Edge Device Settings",
-                        "type": "Microsoft.Common.Section",
-                        "elements": [
-                            {
-                                "type": "Microsoft.Common.InfoBox",
-                                "name": "edgeDeviceInfo",
-                                "options": {
-                                    "icon": "Info",
-                                    "text": "You have selected to deploy a VM to use as an edge device. Please provide a username and password for admin access. Note: these credentials are only for admin access, they are not used by the edge module."
-                                }
-                            },
-                            {
-                                "name": "simulatedEdgeDeviceAdminUsername",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Username",
-                                "defaultValue": "avaadmin",
-                                "constraints": {
-                                    "required": "[steps('simulatedDeviceSection').visible]"
-                                },
-                                "visible": true
-                            },
-                            {
-                                "name": "simulatedEdgeDeviceAdminPassword",
-                                "type": "Microsoft.Common.PasswordBox",
-                                "label": {
-                                    "password": "Password",
-                                    "confirmPassword": "Confirm password"
-                                },
-                                "toolTip": "",
-                                "constraints": {
-                                    "required": "[steps('simulatedDeviceSection').visible]"
-                                },
-                                "options": {
-                                    "hideConfirmation": false
-                                },
-                                "visible": true
-                            },
-                            {
-                                "name": "useBastionHost",
-                                "type": "Microsoft.Common.CheckBox",
-                                "label": "Do you want to use a bastion host for connecting to the edge device?",
-                                "constraints": {
-                                    "required": false
-                                },
-                                "visible": true
-                            }
-                        ],
-                        "visible": "[not(contains(basics('useExistingEdgeDevice'),'existing'))]"
-                    },
                     {
                         "name": "existingDeviceSection",
                         "label": "Existing Edge Device Settings",
@@ -165,7 +96,7 @@
                                 "toolTip": "This list is restricted to IoT Hubs within the selected subscription.",
                                 "resourceType": "Microsoft.Devices/IotHubs",
                                 "constraints": {
-                                    "required": false
+                                    "required": true
                                 },
                                 "options": {
                                     "filter": {
@@ -194,13 +125,13 @@
                                 "defaultValue": "",
                                 "toolTip": "Enter the name of existing IoT Edge device.",
                                 "constraints": {
-                                    "required": false,
+                                    "required": true,
                                     "regex": "",
                                     "validationMessage": ""
                                 }
                             }
                         ],
-                        "visible": "[contains(basics('useExistingEdgeDevice'),'existing')]"
+                        "visible": true
                     }
                 ]
             }
@@ -208,12 +139,10 @@
         "outputs": {
             "resourceGroup": "[basics('resourceGroup')]",
             "scenario": "[basics('scenario')]",
-            "useExistingEdgeDevice": "[equals(basics('useExistingEdgeDevice'),'existing')]",
-            "simulatedEdgeDeviceAdminUsername": "[steps('edgeDeviceSettings').simulatedDeviceSection.simulatedEdgeDeviceAdminUsername]",
-            "simulatedEdgeDeviceAdminPassword": "[if(empty(steps('edgeDeviceSettings').simulatedDeviceSection.simulatedEdgeDeviceAdminPassword),'no-password-needed',steps('edgeDeviceSettings').simulatedDeviceSection.simulatedEdgeDeviceAdminPassword)]",
-             "existingHubName": "[steps('edgeDeviceSettings').existingDeviceSection.existingHubName.name]",
+            "useExistingEdgeDevice": true,
+            "existingHubName": "[steps('edgeDeviceSettings').existingDeviceSection.existingHubName.name]",
             "existingDeviceName": "[steps('edgeDeviceSettings').existingDeviceSection.existingDeviceName]",
-            "existingHubNameResourceGroup": "[if(contains(basics('useExistingEdgeDevice'),'existing'),substring(steps('edgeDeviceSettings').existingDeviceSection.existingHubName.id, add(lastIndexOf(steps('edgeDeviceSettings').existingDeviceSection.existingHubName.id,'resourceGroups/'),length('resourceGroups/')), sub(sub(lastIndexOf(steps('edgeDeviceSettings').existingDeviceSection.existingHubName.id,'providers/'),lastIndexOf(steps('edgeDeviceSettings').existingDeviceSection.existingHubName.id,'resourceGroups/')),16)),'')]",
+            "existingHubNameResourceGroup": "[substring(steps('edgeDeviceSettings').existingDeviceSection.existingHubName.id, add(lastIndexOf(steps('edgeDeviceSettings').existingDeviceSection.existingHubName.id,'resourceGroups/'),length('resourceGroups/')), sub(sub(lastIndexOf(steps('edgeDeviceSettings').existingDeviceSection.existingHubName.id,'providers/'),lastIndexOf(steps('edgeDeviceSettings').existingDeviceSection.existingHubName.id,'resourceGroups/')),16))]",
             "resourceTags": {
                 "sample": "azure-video-analyzer"
             },
