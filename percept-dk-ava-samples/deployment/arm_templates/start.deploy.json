@@ -1,5 +1,5 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
 	"metadata": {
 		"description": "This template orchestrates a deployment of Azure Video Analyzer (AVA) and the supporting resources needed for running most official samples. It is a subscription level deployment and uses both nested and linked templates for scope and modularity."
