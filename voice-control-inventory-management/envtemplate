@@ -1,0 +1,4 @@
+# Rename to .env before creating deployment manifest from the template
+SPEECH_APPID=<Your APP ID>
+SPEECH_KEY=<Your Speech Key>
+SPEECH_REGION=<Your Speech Region>
