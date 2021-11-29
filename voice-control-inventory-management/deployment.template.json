@@ -1,0 +1,139 @@
+{
+  "$schema-template": "2.0.0",
+  "modulesContent": {
+    "$edgeAgent": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "runtime": {
+          "type": "docker",
+          "settings": {
+            "minDockerVersion": "v1.25",
+            "loggingOptions": "",
+            "registryCredentials": {
+            }
+          }
+        },
+        "systemModules": {
+          "edgeAgent": {
+            "type": "docker",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-agent:1.1",
+              "createOptions": {}
+            }
+          },
+          "edgeHub": {
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-hub:1.1",
+              "createOptions": {
+                "HostConfig": {
+                  "PortBindings": {
+                    "5671/tcp": [
+                      {
+                        "HostPort": "5671"
+                      }
+                    ],
+                    "8883/tcp": [
+                      {
+                        "HostPort": "8883"
+                      }
+                    ],
+                    "443/tcp": [
+                      {
+                        "HostPort": "443"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "modules": {
+          "azureeyemodule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/azureedgedevices/azureeyemodule:preload-devkit",
+              "createOptions": {
+                "ExposedPorts": {
+                  "8554/tcp": {}
+                },
+                "HostConfig": {
+                  "Binds": [
+                    "/dev/bus/usb:/dev/bus/usb"
+                  ],
+                  "Privileged": true,
+                  "DeviceCgroupRules": [
+                    "c 189:* rmw"
+                  ],
+                  "PortBindings": {
+                    "8554/tcp": [{"HostPort": "8554"}]
+                  }
+                }
+              }
+            }
+          },
+          "azureearspeechclientmodule": {
+            "settings": {
+              "image": "mcr.microsoft.com/azureedgedevices/azureearspeechclientmodule:preload-devkit",
+              "createOptions": {
+                "HostConfig":{
+                  "Privileged": true,
+                  "Binds": [
+                    "/dev:/dev"
+                  ]
+                }
+              }
+            },
+            "type": "docker",
+            "version": "1.0",
+            "status": "running",
+            "restartPolicy": "always"
+          }
+        }
+      }
+    },
+    "$edgeHub": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "routes": {
+        },
+        "storeAndForwardConfiguration": {
+          "timeToLiveSecs": 7200
+        }
+      }
+    },
+    "azureeyemodule": {
+      "properties.desired": {
+        "Logging": true,
+        "ModelZipUrl": "https://irisprodeutraining.blob.core.windows.net:443/m-f662604cfec843be89680747b05636bd/2f30e41ee0444b40a2d5fd20aa76c9c3.OpenVino.NoPostProcess.zip?sv=2019-12-12&se=2021-07-02T14%3A36%3A50Z&sr=b&sp=r&sig=0bShWPIK5g3uSJscBXOqWK9OdUcC3TtHDLZpKHUx9ac%3D",
+        "RawStream": true,
+        "ResultStream": true,
+        "Running": true,
+        "TelemetryInterval": 10
+      }
+    },
+    "azureearspeechclientmodule": {
+      "properties.desired": {
+          "speechConfigs": {
+              "appId": "$SPEECH_APPID",
+              "key": "$SPEECH_KEY",
+              "region": "$SPEECH_REGION",
+              "keywordModelUrl": "https://aedspeechscenarios.blob.core.windows.net/keyword-tables/computer.table",
+              "keyword": "computer",
+              "skillType": "xxx",
+              "speechLogFile": "speech.log"
+          },
+          "deviceConfigs": {
+              "volume": 45,
+              "enableSendAppLog": false
+          }
+      }
+    }
+  }
+}

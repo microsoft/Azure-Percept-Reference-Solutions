@@ -1,0 +1,232 @@
+{
+  "en-us": {
+    "entityResolver": {
+      "type": "nop",
+      "isGenerated": false
+    },
+    "minIntentConfidence": 0.4,
+    "highIntentConfidence": 0.8,
+    "lgTemplates": [
+      "# FallbackResponse",
+      "- Add your fallback message here",
+      "# OnOff-Color",
+      "- which color of the box you want to control?",
+      "# OnOff-NumberBox",
+      "- How many boxes you want to control?",
+      "# OnOff-AddRemove",
+      "- What action you want to do to boxes?",
+      "# OnOff-4ccaa120e8d811eb8cff0591486ae3c5",
+      "- Sure, {AddRemove} {NumberBox} {Color} boxes",
+      "# AddRemove-UpdateSQLonSuccess-17dc7fa02ab011ecb781c97ad16cab57",
+      "- {NumberBox} {Color} boxes have been {AddRemove}ed",
+      "# AddRemove-UpdateSQLonFailure-17dc7fa02ab011ecb781c97ad16cab57",
+      "- Sorry, {WebEngpointErrorMessage}"
+    ],
+    "lgTemplatesMap": {
+      "# FallbackResponse": [
+        "- Add your fallback message here"
+      ],
+      "# OnOff-Color": [
+        "- which color of the box you want to control?"
+      ],
+      "# OnOff-NumberBox": [
+        "- How many boxes you want to control?"
+      ],
+      "# OnOff-AddRemove": [
+        "- What action you want to do to boxes?"
+      ],
+      "# OnOff-4ccaa120e8d811eb8cff0591486ae3c5": [
+        "- Sure, {AddRemove} {NumberBox} {Color} boxes"
+      ],
+      "# AddRemove-UpdateSQLonSuccess-17dc7fa02ab011ecb781c97ad16cab57": [
+        "- {NumberBox} {Color} boxes have been {AddRemove}ed"
+      ],
+      "# AddRemove-UpdateSQLonFailure-17dc7fa02ab011ecb781c97ad16cab57": [
+        "- Sorry, {WebEngpointErrorMessage}"
+      ]
+    },
+    "type": "BaseLanguage",
+    "recognizer": {
+      "application": "",
+      "isStaging": false,
+      "versionId": "0.1",
+      "type": "luis"
+    },
+    "speechOutput": {
+      "font": "Microsoft Server Speech Text to Speech Voice (en-US, AnaNeural)",
+      "locale": "en-US"
+    },
+    "registeredKeywords": [
+      ""
+    ],
+    "webEndpoints": [
+      {
+        "name": "UpdateSQL",
+        "method": "POST",
+        "url": "https://stock-dk-test.azurewebsites.net/api/httpexample",
+        "headers": {},
+        "parameters": {},
+        "sendFrame": false,
+        "updateFrame": false,
+        "remoteUpdate": false
+      }
+    ],
+    "globalParameters": [],
+    "commands": [
+      {
+        "name": "FallbackCommand",
+        "completionStrategy": "OnRequiredParameters",
+        "parameters": [],
+        "rules": [],
+        "completionRules": [
+          {
+            "name": "DefaultResponse",
+            "conditions": [
+              {
+                "type": "True"
+              }
+            ],
+            "actions": [
+              {
+                "type": "SpeechResponse",
+                "response": {
+                  "type": "Template",
+                  "templateName": "# FallbackResponse"
+                }
+              }
+            ],
+            "postExecutionState": "None"
+          }
+        ],
+        "triggeringExamples": [
+          "> - You can start sentences with '>' to add comments.",
+          "> - You can also use parameters by adding the name of the parameter within curly braces, i.e.",
+          "> Set an alarm to {YourDateParameterName}",
+          "> Where YourDateParameterName is the name of a parameter defined in the 'Parameters' section.",
+          "Help",
+          "Help me",
+          "What can you do?",
+          "How can I start?",
+          "Hello",
+          "Hi"
+        ],
+        "multiTurnExamples": []
+      },
+      {
+        "name": "AddRemove",
+        "completionStrategy": "OnRequiredParameters",
+        "parameters": [
+          {
+            "name": "Color",
+            "type": {
+              "name": "String",
+              "defaultValue": "red",
+              "configuration": {
+                "type": "StringList",
+                "values": {
+                  "red": [],
+                  "green": [],
+                  "yellow": []
+                }
+              }
+            },
+            "elicitResponse": {
+              "type": "Template",
+              "templateName": "# OnOff-Color"
+            }
+          },
+          {
+            "name": "NumberBox",
+            "type": {
+              "name": "Number",
+              "defaultValue": "1"
+            },
+            "elicitResponse": {
+              "type": "Template",
+              "templateName": "# OnOff-NumberBox"
+            }
+          },
+          {
+            "name": "AddRemove",
+            "type": {
+              "name": "String",
+              "configuration": {
+                "type": "StringList",
+                "values": {
+                  "add": [],
+                  "remove": []
+                }
+              }
+            },
+            "elicitResponse": {
+              "type": "Template",
+              "templateName": "# OnOff-AddRemove"
+            }
+          }
+        ],
+        "rules": [],
+        "completionRules": [
+          {
+            "name": "ConfirmationResponse",
+            "conditions": [
+              {
+                "type": "True"
+              },
+              {
+                "type": "RequiredParameters",
+                "names": [
+                  "AddRemove",
+                  "NumberBox",
+                  "Color"
+                ]
+              }
+            ],
+            "actions": [
+              {
+                "type": "SpeechResponse",
+                "response": {
+                  "type": "Template",
+                  "templateName": "# OnOff-4ccaa120e8d811eb8cff0591486ae3c5"
+                }
+              },
+              {
+                "type": "CallHttpEndpoint",
+                "name": "UpdateSQL",
+                "content": {
+                  "action": "{AddRemove}",
+                  "num-box": "{NumberBox}",
+                  "color": "{Color}"
+                },
+                "parameters": "",
+                "onSuccess": {
+                  "type": "SpeechResponse",
+                  "response": {
+                    "type": "Template",
+                    "templateName": "# AddRemove-UpdateSQLonSuccess-17dc7fa02ab011ecb781c97ad16cab57"
+                  }
+                },
+                "onFailure": {
+                  "type": "SpeechResponse",
+                  "response": {
+                    "type": "Template",
+                    "templateName": "# AddRemove-UpdateSQLonFailure-17dc7fa02ab011ecb781c97ad16cab57"
+                  }
+                }
+              }
+            ],
+            "nextTurnExpectations": [],
+            "postExecutionState": "CompleteCommand"
+          }
+        ],
+        "triggeringExamples": [
+          "{AddRemove} {NumberBox} {Color} boxes",
+          "{AddRemove} {NumberBox} {Color} box",
+          "{AddRemove} {NumberBox} boxes",
+          "{AddRemove} {NumberBox} box",
+          "{AddRemove} {Color} boxes",
+          "{AddRemove} {Color} box"
+        ]
+      }
+    ]
+  }
+}
