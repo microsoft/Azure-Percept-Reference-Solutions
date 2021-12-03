@@ -1,0 +1,4 @@
+# Rename to .env before creating deployment manifest from the template
+CONTAINER_REGISTRY_USERNAME=<your container registry Username>
+CONTAINER_REGISTRY_PASSWORD=<your container registry Password>
+CONTAINER_REGISTRY_LOGINSERVER=<your container registry Login Server>
