@@ -1,0 +1,143 @@
+{
+  "$schema-template": "2.0.0",
+  "modulesContent": {
+    "$edgeAgent": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "runtime": {
+          "type": "docker",
+          "settings": {
+            "minDockerVersion": "v1.25",
+            "loggingOptions": "",
+            "registryCredentials": {
+              "361d": {
+                "username": "$CONTAINER_REGISTRY_USERNAME",
+                "password": "$CONTAINER_REGISTRY_PASSWORD",
+                "address": "$CONTAINER_REGISTRY_LOGINSERVER"
+              }
+            }
+          }
+        },
+        "systemModules": {
+          "edgeAgent": {
+            "type": "docker",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-agent:1.1",
+              "createOptions": {}
+            }
+          },
+          "edgeHub": {
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-hub:1.1",
+              "createOptions": {
+                "HostConfig": {
+                  "PortBindings": {
+                    "5671/tcp": [
+                      {
+                        "HostPort": "5671"
+                      }
+                    ],
+                    "8883/tcp": [
+                      {
+                        "HostPort": "8883"
+                      }
+                    ],
+                    "443/tcp": [
+                      {
+                        "HostPort": "443"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "modules": {
+          "WebStreamModule": {
+            "settings": {
+                "image": "mcr.microsoft.com/azureedgedevices/webstreammodule:preload-devkit",
+                "createOptions": "{\"ExposedPorts\":{\"2999/tcp\":{},\"3000/tcp\":{},\"3002/tcp\":{},\"3004/tcp\":{},\"3006/tcp\":{},\"3008/tcp\":{},\"3010/tcp\":{}},\"HostConfig\":{\"PortBindings\":{\"2999/tcp\":[{\"HostPort\":\"2999\"}],\"3000/tcp\":[{\"HostPort\":\"3000\"}],\"3002/tcp\":[{\"HostPort\":\"3002\"}],\"3004/tcp\":[{\"HostPort\":\"3004\"}],\"3006/tcp\":[{\"HostPort\":\"3006\"}],\"3008/tcp\":[{\"HostPort\":\"3008\"}],\"3010/tcp\":[{\"HostPort\":\"3010\"}]}}}"
+            },
+            "type": "docker",
+            "version": "1.0",
+            "env": {
+                "RTSP_IP": {
+                    "value": "azureeyemodule"
+                },
+                "RTSP_PORT": {
+                    "value": "8554"
+                },
+                "RTSP_PATH": {
+                    "value": "result"
+                }
+            },
+            "status": "running",
+            "restartPolicy": "always"
+          },
+          "CountModule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "${MODULES.CountModule}",
+              "createOptions": {}
+            }
+          },
+          "azureeyemodule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/azureedgedevices/azureeyemodule:2108-1",
+              "createOptions": {
+                "ExposedPorts": {
+                  "8554/tcp": {}
+                },
+                "HostConfig": {
+                  "Binds": [
+                    "/dev/bus/usb:/dev/bus/usb"
+                  ],
+                  "Privileged": true,
+                  "DeviceCgroupRules": [
+                    "c 189:* rmw"
+                  ],
+                  "PortBindings": {
+                    "8554/tcp": [{"HostPort": "8554"}]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "$edgeHub": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "routes": {
+          "AzureEyeToCountModule": "FROM /messages/modules/azureeyemodule/outputs/* INTO BrokeredEndpoint(\"/modules/CountModule/inputs/CountInput\")",
+          "CountModuleToHub": "FROM /messages/modules/CountModule/outputs/* INTO $upstream"
+        },
+        "storeAndForwardConfiguration": {
+          "timeToLiveSecs": 7200
+        }
+      }
+    },
+    "azureeyemodule": {
+      "properties.desired": {
+        "Logging": true,
+        "ModelZipUrl": "https://aedsamples.blob.core.windows.net/vision/aeddevkitnew/person-detection-retail-0013.zip",
+        "RawStream": true,
+        "ResultStream": true,
+        "Running": true,
+        "TelemetryInterval": 10
+      }
+    }
+  }
+}
