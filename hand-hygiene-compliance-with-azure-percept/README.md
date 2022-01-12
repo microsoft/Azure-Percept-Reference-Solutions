@@ -36,7 +36,7 @@ The goal of this project is to be able to detect if users washed their hands for
 
 3. Create a file named `.env` in this folder based on `envtemplate`. Provide values for all variables.
 
-4. Create your own hands detection model and deploy it to DK as in here
+4. Create your own hands detection model and deploy it to DK as in [here](https://docs.microsoft.com/en-us/azure/azure-percept/tutorial-nocode-vision)
 
 5. Visit the [evaluatemodule folder](https://github.com/leannhuang/hand-hygiene-compliance-with-azure-percept/tree/main/modules/evaluatemodule) to deploy edge modules on your edge device
 
