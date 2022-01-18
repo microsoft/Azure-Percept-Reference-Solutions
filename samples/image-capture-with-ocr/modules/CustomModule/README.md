@@ -17,13 +17,13 @@ Use this information to deploy people counting modules on your edge device
 
 1. Create a [Computer Vision resource](https://portal.azure.com/#create/Microsoft.CognitiveServicesComputerVision) in the Azure portal to get your subscription key and location. 
    
-   ![1](/docs/images/1_1.png)  
+   ![1](../../docs/images/1_1.png)  
 
 2. Modify the [DEFINED_OBJECT](https://github.com/leannhuang/image-capture-with-ocr/blob/main/modules/CustomModule/main.py#L36) in the `main.py` according to the object you defined in the custom vision
 
 3. Fill in the `SUBSCRIPTION_KEY` and `COMPUTERVISION_LOCATION` in the `main.py`
 
-   ![2](/docs/images/2.png)
+   ![2](../../docs/images/2.png)
 
 
 4. Fill your ACR address in `module.json` file (ex: dk361d.azurecr.io/ocr)
