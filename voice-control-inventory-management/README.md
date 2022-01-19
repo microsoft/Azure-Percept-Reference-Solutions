@@ -96,7 +96,7 @@ The goal of this project is to be able to do the inventory management by voice w
 
          ![clustered-column](docs/images/clustered-column.png)
 
-      2. Drag and drop the color column to the Legend and you will get the chart that looks like below.
+      2. Drag and drop the color column to the Legend and you will get the chart that looks like below. 
          
          ![drag-drop-color](docs/images/drag-drop-color.png)
 
