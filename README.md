@@ -5,7 +5,7 @@ Welcome to the GitHub repo for the Azure Percept reference solutions.
 If you want to learn more about Azure Percept, please visit [Azure Percept documentation](https://docs.microsoft.com/en-us/azure/azure-percept/) 
 or [product page](https://azure.microsoft.com/en-us/services/azure-percept/).
 
-In this repo you'll find examples of end-to-end reference solutions. Each solution has it's own folder with detailed setup instructions.
+In this repo you'll find examples of end-to-end reference solutions. Meaning the solution will contain Azure Perecept components along with other Azure services. Each solution has it's own folder with detailed setup instructions.
 
 ## Contributing
 
