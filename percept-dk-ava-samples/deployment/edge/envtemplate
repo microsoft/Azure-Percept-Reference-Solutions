@@ -1,9 +1,0 @@
-# Rename to .env before creating deployment manifest from the template
-SUBSCRIPTION_ID=<Azure subscription id>
-RESOUCE_GROUP=<Resource Group for AVA>
-AVA_PROVISIONING_TOKEN=<AVA provisioning token found in the avaedge Module Twin properties>
-
-# If changing the following, ensure the paths exist with the proper permissions on the device
-VIDEO_INPUT_FOLDER_ON_DEVICE=/home/localedgeuser/samples/input
-VIDEO_OUTPUT_FOLDER_ON_DEVICE=/var/media/
-APPDATA_FOLDER_ON_DEVICE=/var/lib/videoanalyzer/
